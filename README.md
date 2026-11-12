@@ -32,12 +32,27 @@ Uygulama http://localhost:3000 adresinde açılır. Diğer komutlar:
 | `npm run format` / `npm run format:check` | Prettier ile biçimlendirme / kontrol |
 | `npm test` | Vitest birim ve bileşen testleri (`test/nuxt`, `test/unit`) |
 | `npm run test:e2e` | Playwright uçtan uca testleri (`test/e2e`); önce `npm run build` gerekir |
+| `npm run db:reset` | Yerel veritabanını sıfırlar ve migration'ları yeniden uygular |
+| `npm run test:db` | Veritabanı testleri (pgTAP, `supabase/tests`): RLS ve yeni kullanıcı kurulumu |
+| `npm run db:types` | Veritabanı şemasından TypeScript tiplerini üretir (`app/types/database.types.ts`); her migration'dan sonra çalıştır |
 
 Playwright tarayıcısını ilk seferde kurmak için: `npx playwright install chromium`.
 
 Her pull request'te ve `main`'e her push'ta GitHub Actions bu kontrollerin hepsini çalıştırır (`.github/workflows/ci.yml`).
 
-Ortam değişkenleri için `.env.example` dosyasını `.env` olarak kopyala. `.env` dosyası repoya eklenmez.
+### Yerel Supabase
+
+Docker Desktop çalışırken:
+
+```bash
+npm run db:start    # Supabase'i yerelde başlatır (ilk seferde imajları indirir)
+npm run db:status   # adresleri ve anahtarları gösterir
+npm run db:stop     # durdurur
+```
+
+`.env.example` dosyasını `.env` olarak kopyala; `SUPABASE_URL` için API adresini, `SUPABASE_KEY` için publishable (anon) anahtarı `npm run db:status` çıktısından al. `.env` dosyası repoya eklenmez. Secret / service role anahtarı hiçbir zaman `.env`'e veya tarayıcı koduna girmez.
+
+Supabase Studio: http://127.0.0.1:54323 · Yerel e-postalar (Mailpit): http://127.0.0.1:54324
 
 ## Belgeler
 

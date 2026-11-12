@@ -6,3 +6,4 @@ coverage
 package-lock.json
 PROJECT.md
 *.md
+app/types/database.types.ts
