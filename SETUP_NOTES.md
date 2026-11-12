@@ -21,10 +21,14 @@ Bu dosya başlangıçtan itibaren yapılanları, sıradaki adımları ve engelle
 11. **T0.0 başladı (`docs/t0-0-product-doc`).** İlk sürümün çalışan moduna odaklanması, wireframe için Figma ve bileşen kütüphanesi olarak Nuxt UI seçildi. `docs/PRODUCT.md` yazıldı. Wireframe'ler Seda'nın kişisel Figma hesabında oluşturuldu: https://www.figma.com/design/DEsZWo6cKR4sdOIyax5Giw
 12. **T0.0 PR #2 ile `main`'e alındı.**
 13. **T0.1 başladı (`feat/t0-1-nuxt-skeleton`).** Nuxt 4.6.3, Nuxt UI 4.12.0 (Tailwind 4), strict TypeScript 6.0.3, ESLint ve Prettier kuruldu; `.gitignore`, `.nvmrc`, `.env.example` ve `app/` klasör yapısı eklendi. Nuxt UI teması taslak palete bağlandı (primary: lacivert, secondary: turkuaz). Lint, tip kontrolü, format kontrolü ve production build başarılı; sayfa masaüstünde ve 500 px genişlikte kontrol edildi. `npm audit` geliştirme araçlarındaki `minimatch` kaynaklı 15 düşük/orta uyarı gösteriyor; zorla düzeltme ESLint'i bir ana sürüm düşüreceği için uygulanmadı.
+14. **T0.1 commit edildi ve push edildi (`68fd9f2`).** Seda'nın isteğiyle PR ve merge birkaç görev sonrasına bırakıldı. Sonraki görevler bir önceki görevin branch'inden açılıyor; PR'lar sırayla açılacak.
+15. **T0.7 başladı (`chore/t0-7-test-ci`, T0.1'in üstünde).** Vitest + `@nuxt/test-utils`, Playwright (masaüstü 1440 px ve mobil Pixel 7) ve GitHub Actions iş akışı eklendi. Yerelde format, lint, typecheck, birim testleri (2), build ve E2E testleri (2) geçti; birim testinin bozuk metni yakaladığı da denendi. Docker kurulu olmadığı için T0.3 (yerel Supabase) bekliyor.
 
 ## Sıradaki Adımlar
 
-- T0.1'i PR ile `main`'e almak; ardından T0.3 (Supabase yerel kurulumu, Docker gerekir) ve T0.6/T0.7.
+- T0.6 (layout) görevine geçmek.
+- T0.3 için Docker Desktop kurulumunu ya da barındırılan bir Supabase projesini Seda ile netleştirmek.
+- Uygun zamanda T0.1 ve sonraki branch'lerin PR'larını sırayla açmak; ilk CI çalışmasından sonra CI kontrollerini `main` korumasına zorunlu olarak eklemek.
 - Nuxt iskeleti kurulmadan önce `.gitignore` ekleme kararını yeniden sormak (`.env` dosyalarının yanlışlıkla public repoya gitmemesi için).
 - T0.0–T0.7 işlerini `PROJECT.md` sırasına göre yürütmek; başlangıçta Nuxt iskeleti, Supabase yerel yapılandırması, auth, şema ve CI kapsamını netleştirmek.
 

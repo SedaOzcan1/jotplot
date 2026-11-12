@@ -30,6 +30,12 @@ Uygulama http://localhost:3000 adresinde açılır. Diğer komutlar:
 | `npm run lint` | ESLint kontrolü |
 | `npm run typecheck` | TypeScript tip kontrolü |
 | `npm run format` / `npm run format:check` | Prettier ile biçimlendirme / kontrol |
+| `npm test` | Vitest birim ve bileşen testleri (`test/nuxt`, `test/unit`) |
+| `npm run test:e2e` | Playwright uçtan uca testleri (`test/e2e`); önce `npm run build` gerekir |
+
+Playwright tarayıcısını ilk seferde kurmak için: `npx playwright install chromium`.
+
+Her pull request'te ve `main`'e her push'ta GitHub Actions bu kontrollerin hepsini çalıştırır (`.github/workflows/ci.yml`).
 
 Ortam değişkenleri için `.env.example` dosyasını `.env` olarak kopyala. `.env` dosyası repoya eklenmez.
 
