@@ -25,6 +25,9 @@ Confirmed decisions are recorded here with their date and rationale. Pending que
 | 2026-11-12 | Vitest with `@nuxt/test-utils` (happy-dom) for unit and component tests; Playwright (Chromium) for E2E on desktop 1440 px and mobile Pixel 7 | Matches the planned test stack; Chromium-only keeps CI fast while still covering a real mobile viewport. |
 | 2026-11-12 | E2E tests run against the production build | Tests the same output that will be deployed. |
 | 2026-11-12 | CI runs on pull requests and pushes to `main`: format, lint, typecheck, unit tests, build, and E2E | Every change entering the protected `main` is checked. Required status checks are added to the ruleset after the first CI run on GitHub. |
+| 2026-11-12 | Route paths in English (`/notes`, `/notes/new`, `/board`, `/ask`, `/settings`); `/` redirects to `/notes` | Keeps URLs consistent with code identifiers; all visible text stays Turkish. Can be revisited before launch. |
+| 2026-11-12 | Light theme only for now (`ui.colorMode: false`) | Dark mode is still an open design decision; this avoids a half-styled dark theme on dark-mode devices. |
+| 2026-11-12 | Selected mode is client state only until auth exists | `profiles.default_mode` will persist it after T0.4/T0.5; student mode is shown as "yakında" and cannot be selected in the MVP. |
 
 ## Pending
 
