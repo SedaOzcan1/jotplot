@@ -14,10 +14,13 @@ Confirmed decisions are recorded here with their date and rationale. Pending que
 | 2026-11-12 | Use GitHub Flow with `<type>/<task-id>-<short-description>` branches | A single long-lived `main` with short task branches fits a solo project without the extra `develop` step. |
 | 2026-11-12 | Merge pull requests with merge commits | Seda chose to keep each branch's full commit history in `main`. |
 | 2026-11-12 | Protect `main`: pull request required, no direct or force pushes, no required approvals | Every change goes through a pull request; approvals are not required because Seda is the only developer. Required CI checks are added after T0.7. |
+| 2026-11-12 | First release (MVP) focuses on employee mode | Seda chose Elif's meeting-notes-to-tasks flow as the first release focus. Student mode stays in the plan and follows after MVP. |
+| 2026-11-12 | Draw rough wireframes in Figma | Seda chose Figma; the file link is kept in `docs/PRODUCT.md`. |
+| 2026-11-12 | Use Nuxt UI as the component library | Tailwind-based official Nuxt library with accessible components and dark mode, the fastest path to the MVP. |
+| 2026-11-12 | Color direction: navy, blue, and turquoise with gradient primary buttons | Seda asked for navy-blue-turquoise tones and gradient buttons. The palette is listed in `docs/PRODUCT.md`; typography, logo, and dark mode remain open. |
 
 ## Pending
 
-- First release persona: employee or student.
 - LLM and embedding providers.
 - Speech-to-text provider, based on the planned Turkish quality comparison.
 - Analytics provider.

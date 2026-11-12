@@ -18,11 +18,11 @@ Bu dosya başlangıçtan itibaren yapılanları, sıradaki adımları ve engelle
 8. **Unit test agent'ı eklendi.** `.github/agents/unit-test-writer.agent.md`: Vitest ile birim testleri yazar; yalnızca test dosyalarını değiştirir, bulduğu hataları düzeltmek yerine raporlar. Global git ayarındaki iş adresi de Seda'nın isteğiyle kişisel kimlikle değiştirildi.
 9. **İlk commit GitHub'a gönderildi.** `5166873` commit'i `origin/main`'e push edildi (Seda erişim anahtarıyla gönderdi; Homebrew ile `gh` kurulumu ağ hatası nedeniyle başarısız oldu).
 10. **Branch düzeni belirlendi.** GitHub Flow, merge commit ile birleştirme ve korumalı `main` seçildi. Kurallar `AGENTS.md`'ye, kararlar `DECISIONS.md`'ye eklendi. Bu değişiklik `docs/branch-workflow` branch'inde.
+11. **T0.0 başladı (`docs/t0-0-product-doc`).** İlk sürümün çalışan moduna odaklanması, wireframe için Figma ve bileşen kütüphanesi olarak Nuxt UI seçildi. `docs/PRODUCT.md` yazıldı. Wireframe'ler Seda'nın kişisel Figma hesabında oluşturuldu: https://www.figma.com/design/DEsZWo6cKR4sdOIyax5Giw
 
 ## Sıradaki Adımlar
 
-- GitHub'da `main` için koruma kuralını (ruleset) açmak ve yalnızca merge commit'e izin vermek.
-- `docs/branch-workflow` branch'ini PR ile `main`'e almak.
+- Seda'nın `docs/PRODUCT.md` ve wireframe incelemesinden sonra T0.0'ı PR ile `main`'e almak.
 - Nuxt iskeleti kurulmadan önce `.gitignore` ekleme kararını yeniden sormak (`.env` dosyalarının yanlışlıkla public repoya gitmemesi için).
 - T0.0–T0.7 işlerini `PROJECT.md` sırasına göre yürütmek; başlangıçta Nuxt iskeleti, Supabase yerel yapılandırması, auth, şema ve CI kapsamını netleştirmek.
 

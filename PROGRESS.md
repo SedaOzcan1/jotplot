@@ -11,8 +11,9 @@ Faz 0 — setup
 - [x] Add project-wide agent guidelines and focused Copilot agent profiles.
 - [x] Create the public GitHub repository and connect this workspace as `origin`.
 - [x] Push the first commit and define the branch workflow.
+- [ ] T0.0 Product document and rough wireframes (drafted and approved; pull request pending).
 - [ ] Complete T0.0–T0.7 as tracked in `PROJECT.md`.
 
 ## Latest Update
 
-2026-11-12: Pushed the first commit (`5166873`) to `origin/main` and chose GitHub Flow with merge commits and a protected `main`. The branch rules are on `docs/branch-workflow` and not yet committed. The application scaffold and tests do not exist yet.
+2026-11-12: Merged PR #1 (`docs/branch-workflow`) into the protected `main` with a merge commit. On `docs/t0-0-product-doc`: drafted `docs/PRODUCT.md` (employee mode first) and rough Figma wireframes for 8 main screens on mobile plus Notes and Board on desktop. Colored the wireframes with a navy-blue-turquoise palette. Pull request pending. The application scaffold and tests do not exist yet.
