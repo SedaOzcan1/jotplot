@@ -15,6 +15,15 @@
 - Update `PROGRESS.md` when a roadmap task changes state and `DECISIONS.md` when a decision is confirmed.
 - Do not commit or push unless Seda explicitly asks.
 
+## Branches and Pull Requests
+- Follow GitHub Flow. `main` is protected and must stay working; never commit directly to `main`.
+- Start every task from an up-to-date `main` on its own branch named `<type>/<task-id>-<short-description>`, for example `feat/t0-1-nuxt-skeleton` or `fix/t1-2-zod-error`. Omit the task ID when there is none, for example `docs/branch-workflow`.
+- Use these types: `feat`, `fix`, `docs`, `test`, `chore`, `refactor`.
+- Keep one roadmap task per branch. Do not mix unrelated changes.
+- Write commit messages in English using the same types as prefixes, for example `feat: add Nuxt skeleton`.
+- Merge into `main` only through a pull request using a merge commit. Delete the branch after merging.
+- Opening, updating, or merging a pull request needs Seda's explicit approval, like commits and pushes.
+
 ## Product and Privacy
 - Design mobile-first and verify relevant desktop and mobile states.
 - Show understandable loading and error states; do not silently discard user input.
