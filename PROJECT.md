@@ -125,7 +125,7 @@ Akış: **kaydet → anla → sor**
 |---|---|---|
 | Dil | **TypeScript** (strict mod) | Tüm proje (ön yüz + Edge Functions); `.vue` dosyalarında da `lang="ts"`, CI'da `nuxi typecheck` |
 | Ön yüz | **Nuxt (Vue 3)** — güncel kararlı sürüm | **Karar verildi.** Composition API + `<script setup lang="ts">`. Supabase için `@nuxtjs/supabase` modülü, durum yönetimi için Pinia (gerektiğinde). |
-| UI | Tailwind CSS | Mobile-first, responsive |
+| UI | Tailwind CSS + **Nuxt UI** | Mobile-first, responsive. **Karar verildi** (2026-11-12): bileşen kütüphanesi Nuxt UI. |
 | Auth | Supabase Auth | E-posta + Google ile giriş |
 | Veritabanı | Supabase PostgreSQL | Row Level Security (RLS) zorunlu |
 | Dosya | Supabase Storage | Ses ve PDF |
@@ -284,7 +284,8 @@ Her görev Bölüm 8'deki **"tamamlandı" tanımına** uymalı.
 - [x] ~~Nuxt mı, Next.js mi?~~ → **Nuxt (Vue 3) + TypeScript** (2026-11). Gerekçe: 5+ yıllık Vue deneyimiyle MVP'ye en hızlı yol; proje yalnızca web olduğu için mobil yol kriteri ortadan kalktı.
 - [x] ~~Uygulamanın adı~~ → **Jotplot** (2026-11). App Store, Product Hunt ve GitHub'da aynı adlı ürün bulunmadı. `jotplot.com` "premium domain for sale" olarak listeleniyor; `jotplot.app` / `.io` kayıt sitesinden kontrol edilecek. Elenen adaylar: Jottask (jottask.app'te aktif AI görev yönetimi ürünü), Unjumble (aynı işi yapan iOS uygulaması), Clarinote, Debrief, Quillo vb.
 - [x] ~~Platform~~ → **Yalnızca web** (responsive). Native mobil (Capacitor / React Native) kapsam dışı.
-- [ ] İlk sürümde hangi mod (çalışan mı, öğrenci mi)?
+- [x] ~~İlk sürümde hangi mod?~~ → **Çalışan modu** (2026-11-12). Öğrenci modu MVP sonrasına kalır.
+- [x] ~~UI bileşen kütüphanesi~~ → **Nuxt UI** (2026-11-12), Tailwind tabanlı.
 - [ ] LLM ve embedding sağlayıcısı
 - [ ] STT servisi (T2.1 sonucuna göre)
 - [ ] Analitik aracı (PostHog mu, Google Analytics mi)
