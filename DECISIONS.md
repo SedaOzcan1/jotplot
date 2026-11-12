@@ -22,6 +22,9 @@ Confirmed decisions are recorded here with their date and rationale. Pending que
 | 2026-11-12 | Pin dependency versions exactly, choosing releases at least two weeks old | Reproducible installs and fewer surprises from brand-new releases. |
 | 2026-11-12 | TypeScript 6.0.3 instead of 7.x | TypeScript 7 is the new native compiler; staying on 6.x avoids compatibility risk with `vue-tsc`. |
 | 2026-11-12 | Prettier formats code; ESLint (`@nuxt/eslint`) checks code quality; Markdown docs are excluded from Prettier | Keeps formatting and linting separate and avoids reformatting Turkish prose documents. |
+| 2026-11-12 | Vitest with `@nuxt/test-utils` (happy-dom) for unit and component tests; Playwright (Chromium) for E2E on desktop 1440 px and mobile Pixel 7 | Matches the planned test stack; Chromium-only keeps CI fast while still covering a real mobile viewport. |
+| 2026-11-12 | E2E tests run against the production build | Tests the same output that will be deployed. |
+| 2026-11-12 | CI runs on pull requests and pushes to `main`: format, lint, typecheck, unit tests, build, and E2E | Every change entering the protected `main` is checked. Required status checks are added to the ruleset after the first CI run on GitHub. |
 
 ## Pending
 
