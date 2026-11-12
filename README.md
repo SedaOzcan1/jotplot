@@ -12,6 +12,27 @@
 
 Jotplot responsive bir web uygulamasıdır; native mobil uygulama planlanmamaktadır.
 
+## Yerel geliştirme
+
+Gereksinim: Node.js 24.15 (sürüm `.nvmrc` içinde). nvm kullanıyorsan:
+
+```bash
+nvm use
+npm install
+npm run dev
+```
+
+Uygulama http://localhost:3000 adresinde açılır. Diğer komutlar:
+
+| Komut | Ne yapar |
+|---|---|
+| `npm run build` | Production build |
+| `npm run lint` | ESLint kontrolü |
+| `npm run typecheck` | TypeScript tip kontrolü |
+| `npm run format` / `npm run format:check` | Prettier ile biçimlendirme / kontrol |
+
+Ortam değişkenleri için `.env.example` dosyasını `.env` olarak kopyala. `.env` dosyası repoya eklenmez.
+
 ## Belgeler
 
 - [PROJECT.md](PROJECT.md): kapsam, kabul kriterleri, mimari ve yol haritası

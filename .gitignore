@@ -1,0 +1,31 @@
+# Nuxt build output
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
+
+# Dependencies
+node_modules
+
+# Logs
+logs
+*.log
+
+# Misc
+.DS_Store
+.fleet
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# Local environment files (never commit secrets)
+.env
+.env.*
+!.env.example
+
+# Test output
+coverage
+playwright-report
+test-results
