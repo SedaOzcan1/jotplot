@@ -54,3 +54,20 @@ jobs:
           name: playwright-report
           path: playwright-report
           retention-days: 7
+
+  database:
+    name: Database tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Start local Postgres and apply migrations
+        run: npx supabase db start
+      - name: Run RLS and schema tests
+        run: npx supabase test db
+      - name: Check generated database types are up to date
+        run: npx supabase gen types typescript --local --schema public | diff - app/types/database.types.ts
