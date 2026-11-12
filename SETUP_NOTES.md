@@ -23,10 +23,13 @@ Bu dosya başlangıçtan itibaren yapılanları, sıradaki adımları ve engelle
 13. **T0.1 başladı (`feat/t0-1-nuxt-skeleton`).** Nuxt 4.6.3, Nuxt UI 4.12.0 (Tailwind 4), strict TypeScript 6.0.3, ESLint ve Prettier kuruldu; `.gitignore`, `.nvmrc`, `.env.example` ve `app/` klasör yapısı eklendi. Nuxt UI teması taslak palete bağlandı (primary: lacivert, secondary: turkuaz). Lint, tip kontrolü, format kontrolü ve production build başarılı; sayfa masaüstünde ve 500 px genişlikte kontrol edildi. `npm audit` geliştirme araçlarındaki `minimatch` kaynaklı 15 düşük/orta uyarı gösteriyor; zorla düzeltme ESLint'i bir ana sürüm düşüreceği için uygulanmadı.
 14. **T0.1 commit edildi ve push edildi (`68fd9f2`).** Seda'nın isteğiyle PR ve merge birkaç görev sonrasına bırakıldı. Sonraki görevler bir önceki görevin branch'inden açılıyor; PR'lar sırayla açılacak.
 15. **T0.7 başladı (`chore/t0-7-test-ci`, T0.1'in üstünde).** Vitest + `@nuxt/test-utils`, Playwright (masaüstü 1440 px ve mobil Pixel 7) ve GitHub Actions iş akışı eklendi. Yerelde format, lint, typecheck, birim testleri (2), build ve E2E testleri (2) geçti; birim testinin bozuk metni yakaladığı da denendi. Docker kurulu olmadığı için T0.3 (yerel Supabase) bekliyor.
+16. **T0.7 commit edildi (`c6ac572`), push edilmedi.** Seda macOS'u 27.2.1'e güncelledi; güncellemeden sonra lint, typecheck, build ve tüm testler yeniden geçti.
+17. **T0.6 başladı (`feat/t0-6-layout`, T0.7'nin üstünde).** Masaüstünde lacivert kenar çubuğu, mobilde üst bar ve alt sekme çubuğu, mod seçici (öğrenci modu "yakında"), Notlar / Yeni not / Pano / Sor / Ayarlar boş durum ekranları eklendi. Birim ve bileşen testleri 8/8, E2E testleri 21/21 geçti (3'ü cihaza özel olduğu için atlandı); 360 px, 390 px ve 1440 px ekran görüntüleri kontrol edildi.
 
 ## Sıradaki Adımlar
 
-- T0.6 (layout) görevine geçmek.
+- T0.7 ve T0.6 branch'lerini push etmek (Seda'nın onayıyla).
+- Docker Desktop kurulumu sonrası T0.3'e geçmek.
 - T0.3 için Docker Desktop kurulumunu ya da barındırılan bir Supabase projesini Seda ile netleştirmek.
 - Uygun zamanda T0.1 ve sonraki branch'lerin PR'larını sırayla açmak; ilk CI çalışmasından sonra CI kontrollerini `main` korumasına zorunlu olarak eklemek.
 - Nuxt iskeleti kurulmadan önce `.gitignore` ekleme kararını yeniden sormak (`.env` dosyalarının yanlışlıkla public repoya gitmemesi için).

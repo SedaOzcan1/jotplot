@@ -4,6 +4,8 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxt/eslint', '@nuxt/ui'],
   css: ['~/assets/css/main.css'],
+  // Light theme only until dark mode is designed (open decision in docs/PRODUCT.md).
+  ui: { colorMode: false },
   app: {
     head: {
       htmlAttrs: { lang: 'tr' },
