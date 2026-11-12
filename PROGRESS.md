@@ -11,9 +11,10 @@ Faz 0 — setup
 - [x] Add project-wide agent guidelines and focused Copilot agent profiles.
 - [x] Create the public GitHub repository and connect this workspace as `origin`.
 - [x] Push the first commit and define the branch workflow.
-- [ ] T0.0 Product document and rough wireframes (drafted and approved; pull request pending).
+- [x] T0.0 Product document and rough wireframes (PR #2).
+- [ ] T0.1 Nuxt skeleton (implemented on `feat/t0-1-nuxt-skeleton`; pull request pending).
 - [ ] Complete T0.0–T0.7 as tracked in `PROJECT.md`.
 
 ## Latest Update
 
-2026-11-12: Merged PR #1 (`docs/branch-workflow`) into the protected `main` with a merge commit. On `docs/t0-0-product-doc`: drafted `docs/PRODUCT.md` (employee mode first) and rough Figma wireframes for 8 main screens on mobile plus Notes and Board on desktop. Colored the wireframes with a navy-blue-turquoise palette. Pull request pending. The application scaffold and tests do not exist yet.
+2026-11-12: Merged T0.0 (PR #2). On `feat/t0-1-nuxt-skeleton`: Nuxt 4.6.3 with Nuxt UI, strict TypeScript, ESLint, and Prettier. `npm run lint`, `npm run typecheck`, `npm run format:check`, and `npm run build` pass; the built page was checked at 1440 px and 500 px. No tests exist yet (T0.7). Pull request pending.

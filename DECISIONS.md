@@ -18,6 +18,10 @@ Confirmed decisions are recorded here with their date and rationale. Pending que
 | 2026-11-12 | Draw rough wireframes in Figma | Seda chose Figma; the file link is kept in `docs/PRODUCT.md`. |
 | 2026-11-12 | Use Nuxt UI as the component library | Tailwind-based official Nuxt library with accessible components and dark mode, the fastest path to the MVP. |
 | 2026-11-12 | Color direction: navy, blue, and turquoise with gradient primary buttons | Seda asked for navy-blue-turquoise tones and gradient buttons. The palette is listed in `docs/PRODUCT.md`; typography, logo, and dark mode remain open. |
+| 2026-11-12 | Node.js 24.15 for development, pinned in `.nvmrc` | Nuxt 4.6 requires Node `^22.22.3` or `^24.15.0`; 24.15.0 was already installed through nvm, so the global default stays untouched. |
+| 2026-11-12 | Pin dependency versions exactly, choosing releases at least two weeks old | Reproducible installs and fewer surprises from brand-new releases. |
+| 2026-11-12 | TypeScript 6.0.3 instead of 7.x | TypeScript 7 is the new native compiler; staying on 6.x avoids compatibility risk with `vue-tsc`. |
+| 2026-11-12 | Prettier formats code; ESLint (`@nuxt/eslint`) checks code quality; Markdown docs are excluded from Prettier | Keeps formatting and linting separate and avoids reformatting Turkish prose documents. |
 
 ## Pending
 
