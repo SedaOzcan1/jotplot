@@ -3,6 +3,8 @@ import {
   AuthServiceError,
   MIN_PASSWORD_LENGTH,
   authErrorMessage,
+  safeRedirectPath,
+  toAuthServiceError,
   validateCredentials,
 } from '~/utils/auth'
 
@@ -49,8 +51,9 @@ describe('authErrorMessage', () => {
     expect(authErrorMessage(new AuthServiceError('invalid_credentials'))).toBe(
       'E-posta veya şifre hatalı.',
     )
-    expect(authErrorMessage(new AuthServiceError('auth_not_configured'))).toContain(
-      'Giriş henüz hazır değil',
+    expect(authErrorMessage(new AuthServiceError('weak_password'))).toContain('Şifre çok zayıf')
+    expect(authErrorMessage(new AuthServiceError('google_not_configured'))).toContain(
+      'Google ile giriş yakında',
     )
   })
 
@@ -59,5 +62,36 @@ describe('authErrorMessage', () => {
     expect(authErrorMessage(new AuthServiceError('something_new'))).toBe(fallback)
     expect(authErrorMessage(new TypeError('Failed to fetch'))).toBe(fallback)
     expect(authErrorMessage(undefined)).toBe(fallback)
+  })
+})
+
+describe('toAuthServiceError', () => {
+  it('keeps the Supabase error code and uses unknown when there is none', () => {
+    expect(toAuthServiceError({ code: 'invalid_credentials' }).code).toBe('invalid_credentials')
+    expect(toAuthServiceError({}).code).toBe('unknown')
+    expect(toAuthServiceError({ code: null }).code).toBe('unknown')
+  })
+})
+
+describe('safeRedirectPath', () => {
+  it('keeps same-site paths', () => {
+    expect(safeRedirectPath('/board')).toBe('/board')
+    expect(safeRedirectPath('/notes/new?x=1')).toBe('/notes/new?x=1')
+  })
+
+  it('falls back to the notes page for missing, external, or looping targets', () => {
+    for (const value of [
+      undefined,
+      null,
+      '',
+      'board',
+      '//evil.example',
+      'https://evil.example',
+      '/\\evil.example',
+      '/login',
+      '/login?next=/board',
+    ]) {
+      expect(safeRedirectPath(value)).toBe('/notes')
+    }
   })
 })

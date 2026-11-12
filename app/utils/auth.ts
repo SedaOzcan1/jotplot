@@ -49,7 +49,8 @@ export class AuthServiceError extends Error {
 }
 
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
-  auth_not_configured: 'Giriş henüz hazır değil. Hesap sistemi yakında eklenecek.',
+  google_not_configured:
+    'Google ile giriş yakında eklenecek. Şimdilik e-posta ve şifreyle devam edebilirsin.',
   invalid_credentials: 'E-posta veya şifre hatalı.',
   email_not_confirmed:
     'E-posta adresin henüz doğrulanmadı. Gelen kutundaki doğrulama bağlantısına tıkla.',
@@ -60,6 +61,11 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
   over_email_send_rate_limit: 'Çok fazla deneme yapıldı. Biraz bekleyip tekrar dene.',
 }
 
+/** Wraps an error returned by Supabase Auth; errors without a code (such as network failures) become `unknown`. */
+export function toAuthServiceError(error: { code?: string | null }): AuthServiceError {
+  return new AuthServiceError(error.code || 'unknown')
+}
+
 const FALLBACK_AUTH_ERROR = 'Bir sorun oluştu. Bağlantını kontrol edip tekrar dene.'
 
 export function authErrorMessage(error: unknown): string {
@@ -67,4 +73,14 @@ export function authErrorMessage(error: unknown): string {
     return AUTH_ERROR_MESSAGES[error.code] ?? FALLBACK_AUTH_ERROR
   }
   return FALLBACK_AUTH_ERROR
+}
+
+/**
+ * Returns a same-site path to continue to after sign-in. Anything that is not a plain
+ * absolute path (for example `//evil.example` or `https://...`) falls back to the notes page.
+ */
+export function safeRedirectPath(path: unknown, fallback = '/notes'): string {
+  if (typeof path !== 'string' || !path.startsWith('/') || path.startsWith('//')) return fallback
+  if (path.includes('\\') || path === '/login' || path.startsWith('/login?')) return fallback
+  return path
 }

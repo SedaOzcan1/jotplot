@@ -8,7 +8,10 @@ const { signIn, signUp, signInWithGoogle } = useAuth()
 const state = reactive<Credentials>({ email: '', password: '' })
 const showPassword = ref(false)
 const errorMessage = ref<string | null>(null)
+const confirmationEmail = ref<string | null>(null)
 const googleLoading = ref(false)
+const redirect = useSupabaseCookieRedirect()
+const ready = useIsMounted()
 
 const copy = computed(() =>
   props.mode === 'login'
@@ -36,9 +39,19 @@ function validate(values: Partial<Credentials>) {
 
 async function onSubmit(event: FormSubmitEvent<Credentials>) {
   errorMessage.value = null
+  confirmationEmail.value = null
+  const credentials = { email: event.data.email.trim(), password: event.data.password }
   try {
-    await (props.mode === 'login' ? signIn(event.data) : signUp(event.data))
-    await navigateTo('/notes')
+    if (props.mode === 'login') {
+      await signIn(credentials)
+    } else {
+      const { needsEmailConfirmation } = await signUp(credentials)
+      if (needsEmailConfirmation) {
+        confirmationEmail.value = credentials.email
+        return
+      }
+    }
+    await navigateTo(safeRedirectPath(redirect.pluck()), { replace: true })
   } catch (error) {
     errorMessage.value = authErrorMessage(error)
   }
@@ -73,12 +86,23 @@ async function onGoogle() {
       :description="errorMessage"
     />
 
+    <UAlert
+      v-if="confirmationEmail"
+      role="status"
+      color="success"
+      variant="subtle"
+      icon="i-lucide-mail-check"
+      title="E-postanı kontrol et"
+      :description="`${confirmationEmail} adresine bir doğrulama bağlantısı gönderdik. Bağlantıya tıklayınca giriş yapılacak.`"
+    />
+
     <UButton
       block
       size="lg"
       color="neutral"
       variant="outline"
       :loading="googleLoading"
+      :disabled="!ready"
       @click="onGoogle"
     >
       <svg v-if="!googleLoading" aria-hidden="true" viewBox="0 0 24 24" class="size-5">
@@ -143,7 +167,7 @@ async function onGoogle() {
         </UInput>
       </UFormField>
 
-      <UButton type="submit" block size="lg" class="bg-brand-gradient">
+      <UButton type="submit" block size="lg" class="bg-brand-gradient" :disabled="!ready">
         {{ copy.submit }}
       </UButton>
     </UForm>

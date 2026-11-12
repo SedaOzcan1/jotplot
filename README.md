@@ -31,7 +31,7 @@ Uygulama http://localhost:3000 adresinde açılır. Diğer komutlar:
 | `npm run typecheck` | TypeScript tip kontrolü |
 | `npm run format` / `npm run format:check` | Prettier ile biçimlendirme / kontrol |
 | `npm test` | Vitest birim ve bileşen testleri (`test/nuxt`, `test/unit`) |
-| `npm run test:e2e` | Playwright uçtan uca testleri (`test/e2e`); önce `npm run build` gerekir |
+| `npm run test:e2e` | Playwright uçtan uca testleri (`test/e2e`); önce `npm run build` gerekir ve yerel Supabase çalışıyor olmalı (testler kendi deneme kullanıcılarını oluşturur) |
 | `npm run db:reset` | Yerel veritabanını sıfırlar ve migration'ları yeniden uygular |
 | `npm run test:db` | Veritabanı testleri (pgTAP, `supabase/tests`): RLS ve yeni kullanıcı kurulumu |
 | `npm run db:types` | Veritabanı şemasından TypeScript tiplerini üretir (`app/types/database.types.ts`); her migration'dan sonra çalıştır |

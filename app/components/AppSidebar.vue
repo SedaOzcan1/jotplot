@@ -34,8 +34,9 @@ const route = useRoute()
         {{ item.label }}
       </NuxtLink>
     </nav>
-    <div class="mt-auto">
+    <div class="mt-auto flex flex-col gap-3">
       <ModeSwitch tone="dark" />
+      <SignOutButton tone="dark" class="justify-start" />
     </div>
   </aside>
 </template>
