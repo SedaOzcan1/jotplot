@@ -36,3 +36,4 @@ Confirmed decisions are recorded here with their date and rationale. Pending que
 - Analytics provider.
 - F4 integration scope and provider details.
 - Faz 5 payment provider and pricing.
+| 2026-11-12 | Add `CLAUDE.md` that imports `AGENTS.md` with `@AGENTS.md`; the rules themselves stay only in `AGENTS.md` | Seda asked for a `CLAUDE.md`. Importing keeps a single source of truth so the two files cannot drift apart. |
