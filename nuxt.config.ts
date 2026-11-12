@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2026-10-27',
   devtools: { enabled: true },
-  modules: ['@nuxt/eslint', '@nuxt/ui'],
+  modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxtjs/supabase'],
   css: ['~/assets/css/main.css'],
   // Light theme only until dark mode is designed (open decision in docs/PRODUCT.md).
   ui: { colorMode: false },
@@ -17,6 +17,13 @@ export default defineNuxtConfig({
         },
       ],
     },
+  },
+  // Reads SUPABASE_URL and SUPABASE_KEY (publishable/anon key only) from the environment.
+  supabase: {
+    // Route protection is added in T0.5 together with working sign-in.
+    redirect: false,
+    // Generated database types are added in T0.4.
+    types: false,
   },
   typescript: {
     strict: true,

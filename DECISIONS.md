@@ -36,3 +36,6 @@ Confirmed decisions are recorded here with their date and rationale. Pending que
 - Analytics provider.
 - F4 integration scope and provider details.
 - Faz 5 payment provider and pricing.
+| 2026-11-12 | Local Supabase through the Supabase CLI and Docker Desktop | Seda chose local development: free, no development data online, and safe for tests. A hosted project can follow for deployment. |
+| 2026-11-12 | Supabase CLI as a pinned dev dependency (`supabase` 2.122.0), run with `npx` or the `db:*` scripts | No global install needed and everyone uses the same CLI version. 3.x is newer than two weeks. |
+| 2026-11-12 | `@nuxtjs/supabase` 2.1.0 as the Supabase client in Nuxt; `@supabase/supabase-js` pinned to 2.118.0 through `overrides` | Seda chose the official Nuxt module for its composables, cookie-based sessions for SSR, and built-in route protection. The override keeps the transitive client within the two-week rule. |
