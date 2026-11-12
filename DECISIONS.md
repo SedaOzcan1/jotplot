@@ -40,3 +40,6 @@ Confirmed decisions are recorded here with their date and rationale. Pending que
 | 2026-11-12 | Supabase CLI as a pinned dev dependency (`supabase` 2.122.0), run with `npx` or the `db:*` scripts | No global install needed and everyone uses the same CLI version. 3.x is newer than two weeks. |
 | 2026-11-12 | `@nuxtjs/supabase` 2.1.0 as the Supabase client in Nuxt; `@supabase/supabase-js` pinned to 2.118.0 through `overrides` | Seda chose the official Nuxt module for its composables, cookie-based sessions for SSR, and built-in route protection. The override keeps the transitive client within the two-week rule. |
 | 2026-11-12 | Minimum password length is 8 characters, enforced in the sign-up form and in Supabase Auth (`minimum_password_length`) | Seda confirmed 8 instead of the Supabase default of 6. |
+| 2026-11-12 | Initial schema has the 9 MVP tables; `subscriptions` and `payment_events` (Faz 5) and `integrations` (F4) are added in their own phases | Keeps the first migration to what the MVP uses. |
+| 2026-11-12 | `chunks.embedding` has no fixed dimension or vector index yet | The embedding provider is still open; the dimension and index follow that choice. |
+| 2026-11-12 | Note (`sources`) statuses are `pending`, `processing`, `ready`, `failed`; the default board created at sign-up is named "Panom" | Covers the processing states in US-1.2 and US-2.2. |
