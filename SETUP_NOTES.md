@@ -25,15 +25,13 @@ Bu dosya başlangıçtan itibaren yapılanları, sıradaki adımları ve engelle
 15. **T0.7 başladı (`chore/t0-7-test-ci`, T0.1'in üstünde).** Vitest + `@nuxt/test-utils`, Playwright (masaüstü 1440 px ve mobil Pixel 7) ve GitHub Actions iş akışı eklendi. Yerelde format, lint, typecheck, birim testleri (2), build ve E2E testleri (2) geçti; birim testinin bozuk metni yakaladığı da denendi. Docker kurulu olmadığı için T0.3 (yerel Supabase) bekliyor.
 16. **T0.7 commit edildi (`c6ac572`), push edilmedi.** Seda macOS'u 27.2.1'e güncelledi; güncellemeden sonra lint, typecheck, build ve tüm testler yeniden geçti.
 17. **T0.6 başladı (`feat/t0-6-layout`, T0.7'nin üstünde).** Masaüstünde lacivert kenar çubuğu, mobilde üst bar ve alt sekme çubuğu, mod seçici (öğrenci modu "yakında"), Notlar / Yeni not / Pano / Sor / Ayarlar boş durum ekranları eklendi. Birim ve bileşen testleri 8/8, E2E testleri 21/21 geçti (3'ü cihaza özel olduğu için atlandı); 360 px, 390 px ve 1440 px ekran görüntüleri kontrol edildi.
+18. **T0.7 ve T0.6 push edildi; T0.1, T0.7 ve T0.6 sırayla PR #3, #4 ve #5 ile `main`'e merge edildi.** Branch'ler silindi. GitHub Actions ilk kez çalıştı; "Lint, typecheck, unit tests, build" ve "End-to-end tests" işleri hem PR'larda hem `main`'de başarılı.
 
 ## Sıradaki Adımlar
 
-- T0.7 ve T0.6 branch'lerini push etmek (Seda'nın onayıyla).
-- Docker Desktop kurulumu sonrası T0.3'e geçmek.
+- CI kontrollerini ("Lint, typecheck, unit tests, build" ve "End-to-end tests") `main-protection` kuralına zorunlu kontrol olarak eklemek (Seda, GitHub ayarlarından).
 - T0.3 için Docker Desktop kurulumunu ya da barındırılan bir Supabase projesini Seda ile netleştirmek.
-- Uygun zamanda T0.1 ve sonraki branch'lerin PR'larını sırayla açmak; ilk CI çalışmasından sonra CI kontrollerini `main` korumasına zorunlu olarak eklemek.
-- Nuxt iskeleti kurulmadan önce `.gitignore` ekleme kararını yeniden sormak (`.env` dosyalarının yanlışlıkla public repoya gitmemesi için).
-- T0.0–T0.7 işlerini `PROJECT.md` sırasına göre yürütmek; başlangıçta Nuxt iskeleti, Supabase yerel yapılandırması, auth, şema ve CI kapsamını netleştirmek.
+- Kalan Faz 0 işlerini (T0.2, T0.3, T0.4, T0.5) `PROJECT.md` sırasına göre yürütmek.
 
 ## Bilgilendirme Şekli
 
