@@ -4,7 +4,7 @@ export interface SignUpResult {
 }
 
 /**
- * Email and password authentication through Supabase Auth.
+ * Email and password, and Google, authentication through Supabase Auth.
  * Errors are thrown as `AuthServiceError` so screens can show a Turkish message.
  */
 export function useAuth() {
@@ -31,9 +31,14 @@ export function useAuth() {
     if (error) throw toAuthServiceError(error)
   }
 
-  function signInWithGoogle(): Promise<never> {
-    // Google sign-in needs OAuth credentials from Google Cloud; it is added in a later step.
-    return Promise.reject(new AuthServiceError('google_not_configured'))
+  async function signInWithGoogle(): Promise<void> {
+    // Sends the browser to Google. Google returns to Supabase, which returns to /confirm; the
+    // page the user originally asked for is kept in a cookie by the Supabase module.
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: confirmUrl },
+    })
+    if (error) throw toAuthServiceError(error)
   }
 
   return { signIn, signUp, signOut, signInWithGoogle }

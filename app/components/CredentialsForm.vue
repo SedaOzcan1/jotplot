@@ -61,10 +61,10 @@ async function onGoogle() {
   errorMessage.value = null
   googleLoading.value = true
   try {
+    // On success the browser leaves for Google, so the button keeps its loading state.
     await signInWithGoogle()
   } catch (error) {
     errorMessage.value = authErrorMessage(error)
-  } finally {
     googleLoading.value = false
   }
 }

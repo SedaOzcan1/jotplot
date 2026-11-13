@@ -49,8 +49,6 @@ export class AuthServiceError extends Error {
 }
 
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
-  google_not_configured:
-    'Google ile giriş yakında eklenecek. Şimdilik e-posta ve şifreyle devam edebilirsin.',
   invalid_credentials: 'E-posta veya şifre hatalı.',
   email_not_confirmed:
     'E-posta adresin henüz doğrulanmadı. Gelen kutundaki doğrulama bağlantısına tıkla.',

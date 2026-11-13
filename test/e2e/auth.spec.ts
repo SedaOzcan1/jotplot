@@ -36,6 +36,29 @@ test.describe('signed out', () => {
     })
   }
 
+  test('Google button sends the visitor to Google through local Supabase', async ({ page }) => {
+    // Stop at Google's sign-in page; tests never talk to Google.
+    await page.route('https://accounts.google.com/**', (route) =>
+      route.fulfill({ contentType: 'text/html', body: '<h1>Google stub</h1>' }),
+    )
+    await page.goto('/login')
+
+    await page.getByRole('button', { name: 'Google ile devam et' }).click()
+
+    await page.waitForURL('https://accounts.google.com/**')
+    const google = new URL(page.url())
+    expect(google.searchParams.get('redirect_uri')).toBe('http://127.0.0.1:54321/auth/v1/callback')
+    expect(google.searchParams.get('client_id')).toMatch(/\.apps\.googleusercontent\.com$/)
+  })
+
+  test('a cancelled Google sign-in shows a way back to the login page', async ({ page }) => {
+    await page.goto('/confirm?error=access_denied&error_description=cancelled')
+
+    await expect(page.getByRole('heading', { name: 'Giriş tamamlanamadı' })).toBeVisible()
+    await page.getByRole('link', { name: 'Giriş sayfasına dön' }).click()
+    await expect(page).toHaveURL('/login')
+  })
+
   test('protected pages send signed-out visitors to the login page', async ({ page }) => {
     for (const path of ['/notes', '/board', '/ask', '/settings']) {
       await page.goto(path)

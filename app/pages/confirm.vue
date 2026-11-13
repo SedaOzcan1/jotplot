@@ -1,6 +1,7 @@
 <script setup lang="ts">
-// Email confirmation links land here. The Supabase client exchanges the code in the URL for a
-// session; once the user is known we continue to the page they originally asked for.
+// Email confirmation links and Google sign-in return here. The Supabase client exchanges the code
+// in the URL for a session; once the user is known we continue to the page they originally asked
+// for. Supabase adds `error` to the URL when a link has expired or Google sign-in was cancelled.
 definePageMeta({ layout: 'auth', title: 'Giriş doğrulanıyor' })
 useSeoMeta({ title: 'Giriş doğrulanıyor' })
 
@@ -24,9 +25,10 @@ watch(
 <template>
   <div class="space-y-4 text-center">
     <template v-if="linkFailed">
-      <h1 class="text-2xl font-bold text-navy-900">Bağlantı geçersiz</h1>
+      <h1 class="text-2xl font-bold text-navy-900">Giriş tamamlanamadı</h1>
       <p class="text-sm text-slate-500">
-        Doğrulama bağlantısının süresi dolmuş ya da daha önce kullanılmış olabilir.
+        Bağlantının süresi dolmuş, daha önce kullanılmış ya da Google ile giriş iptal edilmiş
+        olabilir. Tekrar dene.
       </p>
       <UButton to="/login" block size="lg" class="bg-brand-gradient">Giriş sayfasına dön</UButton>
     </template>

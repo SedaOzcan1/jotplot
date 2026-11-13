@@ -6,6 +6,7 @@ const { auth } = vi.hoisted(() => ({
     signInWithPassword: vi.fn(),
     signUp: vi.fn(),
     signOut: vi.fn(),
+    signInWithOAuth: vi.fn(),
   },
 }))
 
@@ -60,9 +61,22 @@ describe('useAuth', () => {
     expect(auth.signOut).toHaveBeenCalledWith({ scope: 'local' })
   })
 
-  it('rejects Google sign-in until it is configured', async () => {
+  it('starts Google sign-in with a return link to /confirm', async () => {
+    auth.signInWithOAuth.mockResolvedValue({ data: {}, error: null })
+
+    await useAuth().signInWithGoogle()
+
+    const [args] = auth.signInWithOAuth.mock.calls[0]!
+    expect(args.provider).toBe('google')
+    expect(new URL(args.options.redirectTo).pathname).toBe('/confirm')
+  })
+
+  it('turns a Google sign-in error into an AuthServiceError', async () => {
+    auth.signInWithOAuth.mockResolvedValue({ data: {}, error: { code: 'validation_failed' } })
+
     await expect(useAuth().signInWithGoogle()).rejects.toMatchObject({
-      code: 'google_not_configured',
+      name: 'AuthServiceError',
+      code: 'validation_failed',
     })
   })
 })

@@ -78,15 +78,27 @@ describe('CredentialsForm', () => {
     expect(status.text()).toContain('elif@example.com')
   })
 
-  it('explains that Google sign-in is coming later', async () => {
-    authMock.signInWithGoogle.mockRejectedValue(new AuthServiceError('google_not_configured'))
+  it('starts Google sign-in from the Google button', async () => {
+    authMock.signInWithGoogle.mockResolvedValue(undefined)
     const wrapper = await mountSuspended(CredentialsForm, { props: { mode: 'login' } })
 
     const google = wrapper.findAll('button').find((b) => b.text().includes('Google ile devam et'))
     await google!.trigger('click')
     await flushPromises()
 
-    expect(wrapper.find('[role="alert"]').text()).toContain('Google ile giriş yakında')
+    expect(authMock.signInWithGoogle).toHaveBeenCalledOnce()
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false)
+  })
+
+  it('shows a message when Google sign-in cannot start', async () => {
+    authMock.signInWithGoogle.mockRejectedValue(new AuthServiceError('unknown'))
+    const wrapper = await mountSuspended(CredentialsForm, { props: { mode: 'register' } })
+
+    const google = wrapper.findAll('button').find((b) => b.text().includes('Google ile devam et'))
+    await google!.trigger('click')
+    await flushPromises()
+
+    expect(wrapper.find('[role="alert"]').text()).toContain('Bir sorun oluştu')
   })
 
   it('toggles password visibility with an accessible button', async () => {

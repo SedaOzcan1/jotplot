@@ -52,9 +52,6 @@ describe('authErrorMessage', () => {
       'E-posta veya şifre hatalı.',
     )
     expect(authErrorMessage(new AuthServiceError('weak_password'))).toContain('Şifre çok zayıf')
-    expect(authErrorMessage(new AuthServiceError('google_not_configured'))).toContain(
-      'Google ile giriş yakında',
-    )
   })
 
   it('falls back to a generic message for unknown codes and other errors', () => {

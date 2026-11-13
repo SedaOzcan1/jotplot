@@ -37,6 +37,11 @@ jobs:
   e2e:
     name: End-to-end tests
     runs-on: ubuntu-latest
+    # Placeholder Google OAuth client so Supabase can load config.toml. Not secrets; tests never
+    # reach Google.
+    env:
+      SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID: ci-placeholder.apps.googleusercontent.com
+      SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET: ci-placeholder-secret
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -66,6 +71,11 @@ jobs:
   database:
     name: Database tests
     runs-on: ubuntu-latest
+    # Placeholder Google OAuth client so Supabase can load config.toml. Not secrets; tests never
+    # reach Google.
+    env:
+      SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID: ci-placeholder.apps.googleusercontent.com
+      SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET: ci-placeholder-secret
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
