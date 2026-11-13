@@ -5,14 +5,16 @@ import {
   type AnalysisUsage,
   type AnalyzeNoteInput,
   type AnalyzeNoteResult,
+  type NoteAnalysis,
   type NoteMode,
   todayInIstanbul,
 } from '../_shared/note-analysis.ts'
 
 /**
  * POST /functions/v1/process-note with `{ "sourceId": "<uuid>" }` and the user's access token.
- * Reads the note with the user's own permissions (Row Level Security), runs the analysis, and
- * returns the summary, decisions, and tasks. Saving them follows in T1.5.
+ * Reads the note with the user's own permissions (Row Level Security), runs the analysis, saves
+ * the summary with the extracted tasks as proposals (they reach the board only after the user
+ * approves them), and returns the result.
  */
 
 export const CORS_HEADERS = {
@@ -84,6 +86,8 @@ export interface UserScope {
   userId: string
   loadNote(sourceId: string): Promise<Note | null>
   setStatus(sourceId: string, status: NoteStatus): Promise<void>
+  /** Creates or replaces the note's summary; returns the summary id. */
+  saveSummary(sourceId: string, analysis: NoteAnalysis): Promise<string>
 }
 
 export interface ProcessNoteDeps {
@@ -153,8 +157,9 @@ export function createHandler(deps: ProcessNoteDeps) {
         return errorResponse(code)
       }
 
+      const summaryId = await scope.saveSummary(sourceId, result.analysis)
       await scope.setStatus(sourceId, 'ready')
-      return json({ sourceId, analysis: result.analysis })
+      return json({ sourceId, summaryId, analysis: result.analysis })
     } catch (error) {
       log('Processing a note failed', { sourceId, error: String(error) })
       await scope.setStatus(sourceId, 'failed').catch(() => {})

@@ -42,6 +42,7 @@ Confirmed decisions are recorded here with their date and rationale. Pending que
 | 2026-11-13 | After a note is saved, the user returns to the notes list, which shows the newest notes first with their title (or first line), a preview, and the date; search and filters follow in T1.8 | Seda chose the notes list so a saved note is visible right away (US-1.1). |
 | 2026-11-13 | A text note is at most 20,000 characters, checked in the form and in the database; the title stays optional (at most 200 characters) | Seda chose 20,000 characters: enough for long meeting notes while keeping AI requests fast and cheap (T1.2, under 30 seconds). |
 | 2026-11-13 | Claude Haiku 5.5 (`claude-haiku-5-5`) extracts summaries, decisions, and tasks from notes (T1.2); the model name is one setting so it can change after the T1.3 quality tests | Seda chose the lowest-cost model (about $0.10 / $0.50 per million input / output tokens; under one cent per note). Higher-quality options (Sonnet 5.5, Opus 5.5) stay available if the quality tests show a need. |
+| 2026-11-13 | The summary, decisions, concepts, and questions are saved as soon as a note is processed; extracted tasks are saved with the summary as proposals and reach the default board's "Yapılacak" column only after the user reviews them and taps "Panoya ekle". Processing a note again replaces its summary and proposals | Seda chose approval first (US-1.3, wireframe 4): the user can fix tasks before they appear on the board. |
 
 ## Pending
 
