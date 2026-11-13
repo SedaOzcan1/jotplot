@@ -28,6 +28,10 @@ Confirmed decisions are recorded here with their date and rationale. Pending que
 | 2026-11-12 | Route paths in English (`/notes`, `/notes/new`, `/board`, `/ask`, `/settings`); `/` redirects to `/notes` | Keeps URLs consistent with code identifiers; all visible text stays Turkish. Can be revisited before launch. |
 | 2026-11-12 | Light theme only for now (`ui.colorMode: false`) | Dark mode is still an open design decision; this avoids a half-styled dark theme on dark-mode devices. |
 | 2026-11-12 | Selected mode is client state only until auth exists | `profiles.default_mode` will persist it after T0.4/T0.5; student mode is shown as "yakında" and cannot be selected in the MVP. |
+| 2026-11-12 | Add `CLAUDE.md` that imports `AGENTS.md` with `@AGENTS.md`; the rules themselves stay only in `AGENTS.md` | Seda asked for a `CLAUDE.md`. Importing keeps a single source of truth so the two files cannot drift apart. |
+| 2026-11-12 | Local Supabase through the Supabase CLI and Docker Desktop | Seda chose local development: free, no development data online, and safe for tests. A hosted project can follow for deployment. |
+| 2026-11-12 | Supabase CLI as a pinned dev dependency (`supabase` 2.122.0), run with `npx` or the `db:*` scripts | No global install needed and everyone uses the same CLI version. 3.x is newer than two weeks. |
+| 2026-11-12 | `@nuxtjs/supabase` 2.1.0 as the Supabase client in Nuxt; `@supabase/supabase-js` pinned to 2.118.0 through `overrides` | Seda chose the official Nuxt module for its composables, cookie-based sessions for SSR, and built-in route protection. The override keeps the transitive client within the two-week rule. |
 
 ## Pending
 
@@ -36,6 +40,3 @@ Confirmed decisions are recorded here with their date and rationale. Pending que
 - Analytics provider.
 - F4 integration scope and provider details.
 - Faz 5 payment provider and pricing.
-| 2026-11-12 | Local Supabase through the Supabase CLI and Docker Desktop | Seda chose local development: free, no development data online, and safe for tests. A hosted project can follow for deployment. |
-| 2026-11-12 | Supabase CLI as a pinned dev dependency (`supabase` 2.122.0), run with `npx` or the `db:*` scripts | No global install needed and everyone uses the same CLI version. 3.x is newer than two weeks. |
-| 2026-11-12 | `@nuxtjs/supabase` 2.1.0 as the Supabase client in Nuxt; `@supabase/supabase-js` pinned to 2.118.0 through `overrides` | Seda chose the official Nuxt module for its composables, cookie-based sessions for SSR, and built-in route protection. The override keeps the transitive client within the two-week rule. |
