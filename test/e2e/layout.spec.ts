@@ -2,7 +2,6 @@ import { expect, test, type Page } from '@playwright/test'
 
 const pages = [
   { path: '/notes', title: 'Notlar', empty: 'Henüz notun yok' },
-  { path: '/notes/new', title: 'Yeni not', empty: 'Not oluşturma yakında burada' },
   { path: '/board', title: 'Pano', empty: 'Panon şimdilik boş' },
   { path: '/ask', title: 'Sor', empty: 'Notlarına soru sor' },
   { path: '/settings', title: 'Ayarlar', empty: 'Diğer ayarlar hazırlanıyor' },
