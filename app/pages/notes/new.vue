@@ -1,12 +1,8 @@
 <script setup lang="ts">
-definePageMeta({ title: 'Yeni not' })
+definePageMeta({ title: 'Yeni not', modeSwitchInPage: true })
 useSeoMeta({ title: 'Yeni not' })
 </script>
 
 <template>
-  <EmptyState
-    icon="i-lucide-sparkles"
-    title="Not oluşturma yakında burada"
-    description="Toplantı notunu yapıştırıp görevlere dönüştürebileceğin ekran bir sonraki adımda eklenecek."
-  />
+  <NoteForm />
 </template>

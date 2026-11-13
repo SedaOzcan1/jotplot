@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { availableModes, type AppMode } from '~/composables/useAppMode'
 
-defineProps<{ tone?: 'light' | 'dark'; compact?: boolean }>()
+withDefaults(defineProps<{ tone?: 'light' | 'dark'; compact?: boolean; label?: string }>(), {
+  tone: 'light',
+  label: 'Mod seçimi',
+})
 
 const { mode, setMode } = useAppMode()
 
@@ -12,7 +15,7 @@ const options: { value: AppMode; label: string; icon: string }[] = [
 </script>
 
 <template>
-  <div role="group" aria-label="Mod seçimi" class="flex flex-wrap gap-1.5">
+  <div role="group" :aria-label="label" class="flex flex-wrap gap-1.5">
     <button
       v-for="option in options"
       :key="option.value"
