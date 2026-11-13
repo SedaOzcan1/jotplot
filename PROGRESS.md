@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Faz 0 — setup
+Faz 0 — setup (complete). Next: Faz 1.
 
 ## Status
 
@@ -15,8 +15,12 @@ Faz 0 — setup
 - [x] T0.1 Nuxt skeleton (PR #3).
 - [x] T0.7 Test and CI (PR #4).
 - [x] T0.6 Layout (PR #5).
-- [ ] Complete T0.0–T0.7 as tracked in `PROJECT.md`.
+- [x] T0.2 Agent rules and `CLAUDE.md` (PR #7).
+- [x] T0.3 Local Supabase with the Nuxt module (PR #8).
+- [x] T0.4 Database schema with RLS and pgTAP tests (PR #9).
+- [x] T0.5 Email and Google sign-in, protected pages (PR #10).
+- [x] Complete T0.0–T0.7 as tracked in `PROJECT.md`.
 
 ## Latest Update
 
-2026-11-12: T0.1, T0.7, and T0.6 are merged into `main` (PRs #3, #4, #5). The first GitHub Actions runs passed on `main` and on the pull requests: "Lint, typecheck, unit tests, build" and "End-to-end tests". Next: add these two checks as required in the `main-protection` ruleset. T0.3 (Supabase) waits for Docker or a hosted project; T0.2, T0.4, and T0.5 remain.
+2026-11-13: Faz 0 is complete. T0.2, T0.3, T0.4, and T0.5 are merged into `main` (PRs #7–#10). CI runs three required checks on every pull request: "Lint, typecheck, unit tests, build", "End-to-end tests", and "Database tests". Google sign-in works locally with an OAuth client in test mode. Next: Faz 1 starts with T1.1 (note creation screen); T1.2 needs the LLM provider decision first.

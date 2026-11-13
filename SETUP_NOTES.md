@@ -26,12 +26,19 @@ Bu dosya başlangıçtan itibaren yapılanları, sıradaki adımları ve engelle
 16. **T0.7 commit edildi (`c6ac572`), push edilmedi.** Seda macOS'u 27.2.1'e güncelledi; güncellemeden sonra lint, typecheck, build ve tüm testler yeniden geçti.
 17. **T0.6 başladı (`feat/t0-6-layout`, T0.7'nin üstünde).** Masaüstünde lacivert kenar çubuğu, mobilde üst bar ve alt sekme çubuğu, mod seçici (öğrenci modu "yakında"), Notlar / Yeni not / Pano / Sor / Ayarlar boş durum ekranları eklendi. Birim ve bileşen testleri 8/8, E2E testleri 21/21 geçti (3'ü cihaza özel olduğu için atlandı); 360 px, 390 px ve 1440 px ekran görüntüleri kontrol edildi.
 18. **T0.7 ve T0.6 push edildi; T0.1, T0.7 ve T0.6 sırayla PR #3, #4 ve #5 ile `main`'e merge edildi.** Branch'ler silindi. GitHub Actions ilk kez çalıştı; "Lint, typecheck, unit tests, build" ve "End-to-end tests" işleri hem PR'larda hem `main`'de başarılı.
+19. **T0.2, T0.3, T0.4 ve T0.5 tamamlandı; Faz 0 bitti.**
+    - T0.2 (PR #7): `AGENTS.md`'ye klasör yapısı, isimlendirme, kütüphane ve test kuralları eklendi. `CLAUDE.md` yalnızca `AGENTS.md`'yi içe aktarıyor.
+    - T0.3 (PR #8): Docker Desktop kuruldu. Supabase yerelde Supabase CLI ile çalışıyor; uygulama `@nuxtjs/supabase` modülüyle bağlanıyor.
+    - T0.4 (PR #9): 9 tablolu ilk şema, her tabloda RLS ve 27 pgTAP testi eklendi. CI'a "Database tests" işi eklendi; Seda bu kontrolü `main-protection` kuralına zorunlu olarak ekledi.
+    - T0.5 (PR #10): E-posta/şifre ve Google ile giriş, korumalı sayfalar ve çıkış eklendi. Seda Google Cloud'da test modunda bir OAuth istemcisi oluşturdu. Değerler git'e girmeyen `supabase/.env` dosyasında; sohbette paylaşılmadı. Google girişi Seda'nın hesabıyla elle denendi.
+    - Birleştirme sırasında `DECISIONS.md`'deki kararlar, "Pending" listesinin altından kararlar tablosuna taşındı.
+    - CI'da iki E2E sorunu düzeltildi: form, sayfa hazır olmadan dolduruluyordu; Google testi de yönlendirme yüzünden gerçek Google'a bağlanıyordu. Testler artık Google'a hiç bağlanmıyor.
 
 ## Sıradaki Adımlar
 
-- CI kontrollerini ("Lint, typecheck, unit tests, build" ve "End-to-end tests") `main-protection` kuralına zorunlu kontrol olarak eklemek (Seda, GitHub ayarlarından).
-- T0.3 için Docker Desktop kurulumunu ya da barındırılan bir Supabase projesini Seda ile netleştirmek.
-- Kalan Faz 0 işlerini (T0.2, T0.3, T0.4, T0.5) `PROJECT.md` sırasına göre yürütmek.
+- Faz 1: T1.1 (not oluşturma ekranı) ile başlamak.
+- T1.2 (Agent Edge Function'ı) için LLM sağlayıcısını Seda ile netleştirmek; karar hâlâ açık.
+- Yayına çıkmadan önce barındırılan bir Supabase projesi ve Google OAuth istemcisinin üretim ayarları gerekecek.
 
 ## Bilgilendirme Şekli
 

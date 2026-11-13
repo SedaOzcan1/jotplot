@@ -192,14 +192,14 @@ Her görev bir agent'a ayrı ayrı verilebilecek şekilde yazıldı. Bağımlıl
 Her görev Bölüm 8'deki **"tamamlandı" tanımına** uymalı.
 
 ### Faz 0 — Altyapı
-- [ ] **T0.0 Ürün dokümanı** — Personaları, user story'leri ve kabul kriterlerini `docs/PRODUCT.md` olarak netleştir. Ana ekranlar için kaba wireframe (Figma veya kâğıt).
-- [ ] **T0.1 Proje iskeleti** — Nuxt + TypeScript (strict), Tailwind, ESLint (`@nuxt/eslint`)/Prettier, klasör yapısı, `.env.example`.
-- [ ] **T0.2 Agent kuralları dosyası** (T0.1) — Repoda `CLAUDE.md` / `AGENTS.md`: klasör yapısı, isimlendirme, kullanılacak kütüphaneler, test ve commit kuralları. Ayrıca `DECISIONS.md` (karar kaydı) ve `PROGRESS.md` (ilerleme notu).
-- [ ] **T0.3 Supabase kurulumu** (T0.1) — Supabase CLI ile yerel ortam (Docker), client, ortam değişkenleri, migration klasörü.
-- [ ] **T0.4 Veritabanı şeması** (T0.3) — Bölüm 5'teki tüm tablolar (`profiles` ve `usage` dahil), RLS politikaları, pgvector eklentisi, yeni kullanıcı için otomatik `profiles` kaydı.
-- [ ] **T0.5 Auth** (T0.3) — Kayıt / giriş / çıkış, korumalı sayfalar, Google ile giriş.
-- [ ] **T0.6 Layout** (T0.1) — Navigasyon, mod seçici (çalışan / öğrenci), boş durum ekranları, mobile-first responsive yapı.
-- [ ] **T0.7 Test ve CI** (T0.1) — Vitest ve Playwright kurulumu, GitHub Actions: lint + type check + test.
+- [x] **T0.0 Ürün dokümanı** — Personaları, user story'leri ve kabul kriterlerini `docs/PRODUCT.md` olarak netleştir. Ana ekranlar için kaba wireframe (Figma veya kâğıt).
+- [x] **T0.1 Proje iskeleti** — Nuxt + TypeScript (strict), Tailwind, ESLint (`@nuxt/eslint`)/Prettier, klasör yapısı, `.env.example`.
+- [x] **T0.2 Agent kuralları dosyası** (T0.1) — Repoda `CLAUDE.md` / `AGENTS.md`: klasör yapısı, isimlendirme, kullanılacak kütüphaneler, test ve commit kuralları. Ayrıca `DECISIONS.md` (karar kaydı) ve `PROGRESS.md` (ilerleme notu).
+- [x] **T0.3 Supabase kurulumu** (T0.1) — Supabase CLI ile yerel ortam (Docker), client, ortam değişkenleri, migration klasörü.
+- [x] **T0.4 Veritabanı şeması** (T0.3) — Bölüm 5'teki tüm tablolar (`profiles` ve `usage` dahil), RLS politikaları, pgvector eklentisi, yeni kullanıcı için otomatik `profiles` kaydı.
+- [x] **T0.5 Auth** (T0.3) — Kayıt / giriş / çıkış, korumalı sayfalar, Google ile giriş.
+- [x] **T0.6 Layout** (T0.1) — Navigasyon, mod seçici (çalışan / öğrenci), boş durum ekranları, mobile-first responsive yapı.
+- [x] **T0.7 Test ve CI** (T0.1) — Vitest ve Playwright kurulumu, GitHub Actions: lint + type check + test.
 
 ### Faz 1 — Nottan göreve
 - [ ] **T1.1 Not oluşturma ekranı** (T0.4, T0.6) — Metin girişi, başlık, mod seçimi, `sources` tablosuna kayıt.
