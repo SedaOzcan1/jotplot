@@ -54,6 +54,10 @@ npm run db:stop     # durdurur
 
 Google ile giriş için Google Cloud'da bir OAuth istemcisi (Web application) oluştur. Yetkili yönlendirme adresi `http://127.0.0.1:54321/auth/v1/callback`, JavaScript kaynağı `http://localhost:3000` olmalı. İstemci kimliğini ve gizli anahtarı `supabase/.env` dosyasına `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` ve `SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET` olarak yaz; bu dosya da repoya eklenmez. Değerleri değiştirdikten sonra `npm run db:stop` ve `npm run db:start` çalıştır. Uygulamayı `localhost:3000` adresinden aç.
 
+### AI (Edge Functions)
+
+Notlardan özet ve görev çıkaran `process-note` fonksiyonu Claude API'sini kullanır. console.anthropic.com'da bir API anahtarı oluştur ve `supabase/functions/.env` dosyasına `ANTHROPIC_API_KEY=` satırı olarak yaz; bu dosya repoya eklenmez ve anahtar tarayıcıya hiç ulaşmaz. Supabase çalışırken fonksiyonları `npm run functions:serve` ile başlat. Testler gerçek API'yi çağırmaz.
+
 Supabase Studio: http://127.0.0.1:54323 · Yerel e-postalar (Mailpit): http://127.0.0.1:54324
 
 ## Belgeler

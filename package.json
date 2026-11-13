@@ -24,7 +24,8 @@
     "db:status": "supabase status",
     "db:reset": "supabase db reset",
     "test:db": "supabase test db",
-    "db:types": "supabase gen types typescript --local --schema public > app/types/database.types.ts"
+    "db:types": "supabase gen types typescript --local --schema public > app/types/database.types.ts",
+    "functions:serve": "supabase functions serve --env-file supabase/functions/.env"
   },
   "dependencies": {
     "@iconify-json/lucide": "1.2.148",
@@ -37,6 +38,7 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "1.1.0",
     "@nuxt/eslint": "1.17.0",
     "@nuxt/test-utils": "4.3.4",
     "@playwright/test": "1.64.1",
