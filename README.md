@@ -33,6 +33,8 @@ Uygulama http://localhost:3000 adresinde açılır. Diğer komutlar:
 | `npm test` | Vitest birim ve bileşen testleri (`test/nuxt`, `test/unit`) |
 | `npm run test:e2e` | Playwright uçtan uca testleri (`test/e2e`); önce `npm run build` gerekir |
 | `npm run db:reset` | Yerel veritabanını sıfırlar ve migration'ları yeniden uygular |
+| `npm run test:db` | Veritabanı testleri (pgTAP, `supabase/tests`): RLS ve yeni kullanıcı kurulumu |
+| `npm run db:types` | Veritabanı şemasından TypeScript tiplerini üretir (`app/types/database.types.ts`); her migration'dan sonra çalıştır |
 
 Playwright tarayıcısını ilk seferde kurmak için: `npx playwright install chromium`.
 

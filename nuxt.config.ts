@@ -22,8 +22,8 @@ export default defineNuxtConfig({
   supabase: {
     // Route protection is added in T0.5 together with working sign-in.
     redirect: false,
-    // Generated database types are added in T0.4.
-    types: false,
+    // Generated from the local database with `npm run db:types`.
+    types: '~/types/database.types.ts',
   },
   typescript: {
     strict: true,
