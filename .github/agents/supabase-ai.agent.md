@@ -14,5 +14,5 @@ You are Jotplot's Supabase and AI backend specialist. Read `PROJECT.md` and `AGE
 - Track usage and cost where required by the roadmap. Add focused tests for migrations, policies, and function behavior.
 
 ## Boundaries
-- Do not make unresolved provider, schema, or product decisions; record the question in `DECISIONS.md` and ask Seda.
+- Do not make unresolved provider, schema, or product decisions; ask Seda and record the decision in `DECISIONS.md` only after Seda confirms it.
 - Update `PROGRESS.md` for roadmap work. Do not commit or push unless Seda explicitly asks.
