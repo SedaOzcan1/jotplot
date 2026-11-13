@@ -31,7 +31,7 @@ Uygulama http://localhost:3000 adresinde açılır. Diğer komutlar:
 | `npm run typecheck` | TypeScript tip kontrolü |
 | `npm run format` / `npm run format:check` | Prettier ile biçimlendirme / kontrol |
 | `npm test` | Vitest birim ve bileşen testleri (`test/nuxt`, `test/unit`) |
-| `npm run test:e2e` | Playwright uçtan uca testleri (`test/e2e`); önce `npm run build` gerekir |
+| `npm run test:e2e` | Playwright uçtan uca testleri (`test/e2e`); önce `npm run build` gerekir ve yerel Supabase çalışıyor olmalı (testler kendi deneme kullanıcılarını oluşturur) |
 | `npm run db:reset` | Yerel veritabanını sıfırlar ve migration'ları yeniden uygular |
 | `npm run test:db` | Veritabanı testleri (pgTAP, `supabase/tests`): RLS ve yeni kullanıcı kurulumu |
 | `npm run db:types` | Veritabanı şemasından TypeScript tiplerini üretir (`app/types/database.types.ts`); her migration'dan sonra çalıştır |
@@ -51,6 +51,8 @@ npm run db:stop     # durdurur
 ```
 
 `.env.example` dosyasını `.env` olarak kopyala; `SUPABASE_URL` için API adresini, `SUPABASE_KEY` için publishable (anon) anahtarı `npm run db:status` çıktısından al. `.env` dosyası repoya eklenmez. Secret / service role anahtarı hiçbir zaman `.env`'e veya tarayıcı koduna girmez.
+
+Google ile giriş için Google Cloud'da bir OAuth istemcisi (Web application) oluştur. Yetkili yönlendirme adresi `http://127.0.0.1:54321/auth/v1/callback`, JavaScript kaynağı `http://localhost:3000` olmalı. İstemci kimliğini ve gizli anahtarı `supabase/.env` dosyasına `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` ve `SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET` olarak yaz; bu dosya da repoya eklenmez. Değerleri değiştirdikten sonra `npm run db:stop` ve `npm run db:start` çalıştır. Uygulamayı `localhost:3000` adresinden aç.
 
 Supabase Studio: http://127.0.0.1:54323 · Yerel e-postalar (Mailpit): http://127.0.0.1:54324
 

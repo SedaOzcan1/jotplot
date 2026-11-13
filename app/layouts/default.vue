@@ -1,8 +1,6 @@
 <script setup lang="ts">
 const route = useRoute()
 const title = computed(() => (typeof route.meta.title === 'string' ? route.meta.title : 'Jotplot'))
-
-useHead({ titleTemplate: (t) => (t && t !== 'Jotplot' ? `${t} · Jotplot` : 'Jotplot') })
 </script>
 
 <template>

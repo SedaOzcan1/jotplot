@@ -12,16 +12,15 @@ concurrency:
 permissions:
   contents: read
 
-# Placeholder Supabase settings so the app builds and renders without a database.
-# They are not secrets; no test talks to a real Supabase instance.
-env:
-  SUPABASE_URL: http://127.0.0.1:54321
-  SUPABASE_KEY: ci-placeholder-publishable-key
-
 jobs:
   checks:
     name: Lint, typecheck, unit tests, build
     runs-on: ubuntu-latest
+    # Placeholder Supabase settings so the app builds without a database. Not secrets;
+    # unit and component tests mock Supabase.
+    env:
+      SUPABASE_URL: http://127.0.0.1:54321
+      SUPABASE_KEY: ci-placeholder-publishable-key
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -38,6 +37,11 @@ jobs:
   e2e:
     name: End-to-end tests
     runs-on: ubuntu-latest
+    # Placeholder Google OAuth client so Supabase can load config.toml. Not secrets; tests never
+    # reach Google.
+    env:
+      SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID: ci-placeholder.apps.googleusercontent.com
+      SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET: ci-placeholder-secret
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -46,6 +50,15 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      - name: Start local Supabase (database, auth, API gateway)
+        run: >-
+          npx supabase start
+          -x realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      - name: Use the local Supabase URL and publishable key
+        run: |
+          eval "$(npx supabase status -o env | grep -E '^(API_URL|PUBLISHABLE_KEY)=')"
+          echo "SUPABASE_URL=$API_URL" >> "$GITHUB_ENV"
+          echo "SUPABASE_KEY=$PUBLISHABLE_KEY" >> "$GITHUB_ENV"
       - run: npm run build
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v7
@@ -58,6 +71,11 @@ jobs:
   database:
     name: Database tests
     runs-on: ubuntu-latest
+    # Placeholder Google OAuth client so Supabase can load config.toml. Not secrets; tests never
+    # reach Google.
+    env:
+      SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID: ci-placeholder.apps.googleusercontent.com
+      SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET: ci-placeholder-secret
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

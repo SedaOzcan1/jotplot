@@ -5,7 +5,7 @@ const pages = [
   { path: '/notes/new', title: 'Yeni not', empty: 'Not oluşturma yakında burada' },
   { path: '/board', title: 'Pano', empty: 'Panon şimdilik boş' },
   { path: '/ask', title: 'Sor', empty: 'Notlarına soru sor' },
-  { path: '/settings', title: 'Ayarlar', empty: 'Ayarlar hazırlanıyor' },
+  { path: '/settings', title: 'Ayarlar', empty: 'Diğer ayarlar hazırlanıyor' },
 ]
 
 async function horizontalOverflow(page: Page) {

@@ -29,3 +29,6 @@ logs
 coverage
 playwright-report
 test-results
+
+# Signed-in browser state saved by Playwright
+test/e2e/.auth

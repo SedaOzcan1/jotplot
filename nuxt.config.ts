@@ -20,8 +20,14 @@ export default defineNuxtConfig({
   },
   // Reads SUPABASE_URL and SUPABASE_KEY (publishable/anon key only) from the environment.
   supabase: {
-    // Route protection is added in T0.5 together with working sign-in.
-    redirect: false,
+    // Signed-out visitors are sent to /login; the page they asked for is restored after sign-in.
+    redirect: true,
+    redirectOptions: {
+      login: '/login',
+      callback: '/confirm',
+      exclude: ['/register'],
+      saveRedirectToCookie: true,
+    },
     // Generated from the local database with `npm run db:types`.
     types: '~/types/database.types.ts',
   },

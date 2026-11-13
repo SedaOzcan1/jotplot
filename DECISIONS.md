@@ -36,6 +36,9 @@ Confirmed decisions are recorded here with their date and rationale. Pending que
 | 2026-11-12 | Initial schema has the 9 MVP tables; `subscriptions` and `payment_events` (Faz 5) and `integrations` (F4) are added in their own phases | Keeps the first migration to what the MVP uses. |
 | 2026-11-12 | `chunks.embedding` has no fixed dimension or vector index yet | The embedding provider is still open; the dimension and index follow that choice. |
 | 2026-11-12 | Note (`sources`) statuses are `pending`, `processing`, `ready`, `failed`; the default board created at sign-up is named "Panom" | Covers the processing states in US-1.2 and US-2.2. |
+| 2026-11-12 | All app pages require sign-in; signed-out visitors go to `/login` and return to the requested page afterwards. `/login` and `/register` send signed-in users to `/notes` | Matches US-0.1. The return path is checked so it can only point inside Jotplot. |
+| 2026-11-12 | "Çıkış yap" signs out the current browser only (`scope: 'local'`) | Signing out on one device should not end sessions on the user's other devices. |
+| 2026-11-12 | E2E tests run against a local Supabase and create their own synthetic users; the local sign-in rate limit is raised from 30 to 100 per 5 minutes | Tests the real sign-in flow without shared or personal accounts. The higher limit applies only to local Supabase. CI starts only the database, auth, REST, and gateway services. |
 
 ## Pending
 
