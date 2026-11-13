@@ -24,9 +24,18 @@ export async function createTestUser(prefix = 'e2e') {
   return { email, password: TEST_PASSWORD }
 }
 
-export async function signInThroughForm(page: Page, email: string, password: string) {
+/**
+ * Fills the sign-in or sign-up form. Waits until the page is interactive (the submit button is
+ * enabled once it is), because values typed before hydration are reset.
+ */
+export async function fillCredentials(page: Page, email: string, password: string) {
+  await expect(page.locator('form button[type="submit"]')).toBeEnabled()
   await page.getByLabel('E-posta').fill(email)
   await page.getByLabel('Şifre', { exact: true }).fill(password)
+}
+
+export async function signInThroughForm(page: Page, email: string, password: string) {
+  await fillCredentials(page, email, password)
   await page.locator('form').getByRole('button', { name: 'Giriş yap' }).click()
 }
 

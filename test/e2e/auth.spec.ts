@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 import {
   createTestUser,
   expectOnLogin,
+  fillCredentials,
   signInThroughForm,
   signedOut,
   TEST_PASSWORD,
@@ -98,8 +99,7 @@ test.describe('signed out', () => {
     const user = await createTestUser('taken')
 
     await page.goto('/register')
-    await page.getByLabel('E-posta').fill(user.email)
-    await page.getByLabel('Şifre', { exact: true }).fill(TEST_PASSWORD)
+    await fillCredentials(page, user.email, TEST_PASSWORD)
     await page.locator('form').getByRole('button', { name: 'Kayıt ol' }).click()
 
     await expect(page.getByRole('alert')).toContainText('zaten bir hesap var')
