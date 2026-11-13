@@ -12,6 +12,12 @@ concurrency:
 permissions:
   contents: read
 
+# Placeholder Supabase settings so the app builds and renders without a database.
+# They are not secrets; no test talks to a real Supabase instance.
+env:
+  SUPABASE_URL: http://127.0.0.1:54321
+  SUPABASE_KEY: ci-placeholder-publishable-key
+
 jobs:
   checks:
     name: Lint, typecheck, unit tests, build
