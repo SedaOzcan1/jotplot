@@ -41,10 +41,11 @@ Confirmed decisions are recorded here with their date and rationale. Pending que
 | 2026-11-12 | E2E tests run against a local Supabase and create their own synthetic users; the local sign-in rate limit is raised from 30 to 100 per 5 minutes | Tests the real sign-in flow without shared or personal accounts. The higher limit applies only to local Supabase. CI starts only the database, auth, REST, and gateway services. |
 | 2026-11-13 | After a note is saved, the user returns to the notes list, which shows the newest notes first with their title (or first line), a preview, and the date; search and filters follow in T1.8 | Seda chose the notes list so a saved note is visible right away (US-1.1). |
 | 2026-11-13 | A text note is at most 20,000 characters, checked in the form and in the database; the title stays optional (at most 200 characters) | Seda chose 20,000 characters: enough for long meeting notes while keeping AI requests fast and cheap (T1.2, under 30 seconds). |
+| 2026-11-13 | Claude Haiku 5.5 (`claude-haiku-5-5`) extracts summaries, decisions, and tasks from notes (T1.2); the model name is one setting so it can change after the T1.3 quality tests | Seda chose the lowest-cost model (about $0.10 / $0.50 per million input / output tokens; under one cent per note). Higher-quality options (Sonnet 5.5, Opus 5.5) stay available if the quality tests show a need. |
 
 ## Pending
 
-- LLM and embedding providers.
+- Embedding provider.
 - Speech-to-text provider, based on the planned Turkish quality comparison.
 - Analytics provider.
 - F4 integration scope and provider details.

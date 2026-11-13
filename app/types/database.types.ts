@@ -167,7 +167,9 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            [_ in never]: never
+            "record_ai_usage":
+{ Args: { "p_cost_usd": number,"p_tokens_in": number,"p_tokens_out": number,"p_user_id": string }; Returns: undefined
+                           }
           }
           Enums: {
             [_ in never]: never
