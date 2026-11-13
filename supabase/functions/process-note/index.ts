@@ -43,6 +43,25 @@ async function userScope(authorization: string | null): Promise<UserScope | null
       const { error } = await client.from('sources').update({ status }).eq('id', sourceId)
       if (error) throw error
     },
+    async saveSummary(sourceId, analysis) {
+      const { data: summary, error } = await client
+        .from('summaries')
+        .upsert(
+          {
+            source_id: sourceId,
+            summary: analysis.summary,
+            decisions: analysis.decisions,
+            concepts: analysis.concepts,
+            questions: analysis.questions,
+            proposed_tasks: analysis.tasks,
+          },
+          { onConflict: 'source_id' },
+        )
+        .select('id')
+        .single()
+      if (error) throw error
+      return summary.id as string
+    },
   }
 }
 

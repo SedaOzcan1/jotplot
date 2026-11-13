@@ -14,6 +14,7 @@ const analysis = { summary: 'Özet', decisions: [], tasks: [], concepts: [], que
 let note: Note | null
 let deps: ProcessNoteDeps & {
   setStatus: ReturnType<typeof vi.fn>
+  saveSummary: ReturnType<typeof vi.fn>
   analyze: ReturnType<typeof vi.fn>
   recordUsage: ReturnType<typeof vi.fn>
 }
@@ -21,15 +22,17 @@ let deps: ProcessNoteDeps & {
 beforeEach(() => {
   note = { id: SOURCE_ID, type: 'text', mode: 'work', raw_text: 'Toplantı notu' }
   const setStatus = vi.fn().mockResolvedValue(undefined)
+  const saveSummary = vi.fn().mockResolvedValue('summary-1')
   deps = {
     model: 'claude-haiku-5-5',
     userScope: async (authorization) =>
       authorization === 'Bearer valid'
-        ? { userId: 'user-1', loadNote: async () => note, setStatus }
+        ? { userId: 'user-1', loadNote: async () => note, setStatus, saveSummary }
         : null,
     analyze: vi.fn().mockResolvedValue({ analysis, usage }),
     recordUsage: vi.fn().mockResolvedValue(undefined),
     setStatus,
+    saveSummary,
     now: () => new Date('2026-11-13T09:00:00Z'),
   }
 })
@@ -81,11 +84,12 @@ describe('process-note', () => {
     expect(deps.setStatus).not.toHaveBeenCalled()
   })
 
-  it('analyzes the note, records usage, and marks the note ready', async () => {
+  it('analyzes the note, saves the summary, records usage, and marks the note ready', async () => {
     const response = await post({ sourceId: SOURCE_ID })
 
     expect(response.status).toBe(200)
-    expect(await response.json()).toEqual({ sourceId: SOURCE_ID, analysis })
+    expect(await response.json()).toEqual({ sourceId: SOURCE_ID, summaryId: 'summary-1', analysis })
+    expect(deps.saveSummary).toHaveBeenCalledWith(SOURCE_ID, analysis)
     expect(deps.analyze).toHaveBeenCalledWith({
       text: 'Toplantı notu',
       mode: 'work',
@@ -112,6 +116,18 @@ describe('process-note', () => {
     expect(body.error.code).toBe('ai_invalid_output')
     expect(body.error.message).toContain('notun kaydedildi')
     expect(deps.recordUsage).toHaveBeenCalledWith('user-1', usage)
+    expect(deps.saveSummary).not.toHaveBeenCalled()
+    expect(deps.setStatus).toHaveBeenLastCalledWith(SOURCE_ID, 'failed')
+  })
+
+  it('marks the note failed when the summary cannot be saved', async () => {
+    deps.saveSummary.mockRejectedValue(new Error('db down'))
+
+    const response = await post({ sourceId: SOURCE_ID })
+
+    expect(response.status).toBe(500)
+    expect(await errorCode(response)).toBe('internal')
+    expect(deps.recordUsage).toHaveBeenCalled()
     expect(deps.setStatus).toHaveBeenLastCalledWith(SOURCE_ID, 'failed')
   })
 

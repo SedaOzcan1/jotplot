@@ -83,14 +83,14 @@ isOneToOne: false
                   ]
                 },"summaries": {
                   Row: {
-                    "concepts": NonNullable<Json>,"created_at": string,"decisions": NonNullable<Json>,"id": string,"questions": NonNullable<Json>,"source_id": string,"summary": string,"updated_at": string,"user_id": string
+                    "concepts": NonNullable<Json>,"created_at": string,"decisions": NonNullable<Json>,"id": string,"proposed_tasks": NonNullable<Json>,"questions": NonNullable<Json>,"source_id": string,"summary": string,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "concepts"?: NonNullable<Json>,"created_at"?: string,"decisions"?: NonNullable<Json>,"id"?: string,"questions"?: NonNullable<Json>,"source_id": string,"summary"?: string,"updated_at"?: string,"user_id"?: string
+                    "concepts"?: NonNullable<Json>,"created_at"?: string,"decisions"?: NonNullable<Json>,"id"?: string,"proposed_tasks"?: NonNullable<Json>,"questions"?: NonNullable<Json>,"source_id": string,"summary"?: string,"updated_at"?: string,"user_id"?: string
                   }
                   Update: {
-                    "concepts"?: NonNullable<Json>,"created_at"?: string,"decisions"?: NonNullable<Json>,"id"?: string,"questions"?: NonNullable<Json>,"source_id"?: string,"summary"?: string,"updated_at"?: string,"user_id"?: string
+                    "concepts"?: NonNullable<Json>,"created_at"?: string,"decisions"?: NonNullable<Json>,"id"?: string,"proposed_tasks"?: NonNullable<Json>,"questions"?: NonNullable<Json>,"source_id"?: string,"summary"?: string,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
