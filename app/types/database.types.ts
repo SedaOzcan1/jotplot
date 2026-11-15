@@ -167,7 +167,10 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "record_ai_usage":
+            "approve_summary":
+{ Args: { "p_concepts": Json,"p_decisions": Json,"p_questions": Json,"p_summary": string,"p_summary_id": string,"p_tasks": Json }; Returns: number
+                           },
+"record_ai_usage":
 { Args: { "p_cost_usd": number,"p_tokens_in": number,"p_tokens_out": number,"p_user_id": string }; Returns: undefined
                            }
           }

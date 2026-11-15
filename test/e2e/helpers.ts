@@ -21,7 +21,8 @@ export async function createTestUser(prefix = 'e2e') {
   const supabase = createClient(url, key, { auth: { persistSession: false } })
   const { error } = await supabase.auth.signUp({ email, password: TEST_PASSWORD })
   if (error) throw error
-  return { email, password: TEST_PASSWORD }
+  // `supabase` is signed in as the new user, so tests can prepare and check their own data.
+  return { email, password: TEST_PASSWORD, supabase }
 }
 
 /**

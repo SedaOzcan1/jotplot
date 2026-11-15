@@ -50,16 +50,18 @@ const typeLabels: Record<string, string> = { text: 'Metin', audio: 'Ses', pdf: '
     />
 
     <ul v-else class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-label="Notlar">
-      <li
-        v-for="note in notes"
-        :key="note.id"
-        class="min-w-0 rounded-xl bg-white p-4 shadow-sm ring-1 ring-navy-100"
-      >
-        <h2 class="font-semibold break-words text-navy-900">{{ noteDisplayTitle(note) }}</h2>
-        <p class="mt-1 text-xs text-slate-500">
-          <time :datetime="note.created_at">{{ formatNoteDate(note.created_at) }}</time>
-          · {{ typeLabels[note.type] ?? 'Not' }}
-        </p>
+      <li v-for="note in notes" :key="note.id" class="min-w-0">
+        <NuxtLink
+          :to="`/notes/${note.id}`"
+          class="block h-full rounded-xl bg-white p-4 shadow-sm ring-1 ring-navy-100 transition hover:ring-navy-300 focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:outline-none"
+        >
+          <h2 class="font-semibold break-words text-navy-900">{{ noteDisplayTitle(note) }}</h2>
+          <p class="mt-1 text-xs text-slate-500">
+            <time :datetime="note.created_at">{{ formatNoteDate(note.created_at) }}</time>
+            · {{ typeLabels[note.type] ?? 'Not' }}
+          </p>
+          <p class="mt-2 text-sm font-medium text-navy-900">{{ noteStatusLine(note) }}</p>
+        </NuxtLink>
       </li>
     </ul>
   </div>
