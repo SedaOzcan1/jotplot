@@ -33,11 +33,13 @@ export function useNotes() {
   async function listNotes(): Promise<NoteListItem[]> {
     const { data, error } = await supabase
       .from('sources')
-      .select('id, title, raw_text, type, created_at')
+      .select(
+        'id, title, raw_text, type, status, created_at, summaries(decisions, proposed_tasks), tasks(count)',
+      )
       .order('created_at', { ascending: false })
       .limit(NOTE_LIST_LIMIT)
     if (error) throw toNoteServiceError(error)
-    return data
+    return data as NoteListItem[]
   }
 
   return { createNote, listNotes }

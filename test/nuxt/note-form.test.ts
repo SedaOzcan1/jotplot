@@ -13,9 +13,20 @@ mockNuxtImport('navigateTo', () => navigateToMock)
 
 type Wrapper = Awaited<ReturnType<typeof mountSuspended>>
 
-async function fillAndSubmit(wrapper: Wrapper, title: string, text: string) {
+/** Fills the form and submits it with one of its two buttons. */
+async function fillAndSubmit(
+  wrapper: Wrapper,
+  title: string,
+  text: string,
+  button: 'Notu kaydet' | 'Görevleri çıkar' = 'Notu kaydet',
+) {
   await wrapper.find('input').setValue(title)
   await wrapper.find('textarea').setValue(text)
+  const submit = wrapper
+    .findAll('button[type="submit"]')
+    .find((candidate: { text(): string }) => candidate.text().includes(button))
+  // A real click runs the button's handler first, then submits the form.
+  await submit!.trigger('click')
   await wrapper.find('form').trigger('submit')
   await flushPromises()
 }
@@ -46,6 +57,16 @@ describe('NoteForm', () => {
       mode: 'work',
     })
     expect(navigateToMock).toHaveBeenCalledWith('/notes')
+  })
+
+  it('opens the note’s page and starts processing with "Görevleri çıkar"', async () => {
+    notesMock.createNote.mockResolvedValue('note-1')
+    const wrapper = await mountSuspended(NoteForm)
+
+    await fillAndSubmit(wrapper, '', 'Ayşe raporu cumaya hazırlayacak.', 'Görevleri çıkar')
+
+    expect(notesMock.createNote).toHaveBeenCalledOnce()
+    expect(navigateToMock).toHaveBeenCalledWith('/notes/note-1?process=1')
   })
 
   it('keeps the typed text and shows an error when saving fails', async () => {

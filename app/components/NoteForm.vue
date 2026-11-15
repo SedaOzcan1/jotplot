@@ -9,6 +9,8 @@ const ready = useIsMounted()
 
 const state = reactive<NewNoteInput>({ title: '', text: '' })
 const saving = ref(false)
+/** Which button submitted the form: save only, or save and run the AI. */
+const intent = ref<'save' | 'process'>('process')
 const errorMessage = ref<string | null>(null)
 
 const textLength = computed(() => state.text.length)
@@ -21,7 +23,12 @@ async function onSubmit(event: FormSubmitEvent<NewNoteInput>) {
   saving.value = true
   try {
     const note = newNoteSchema.parse(event.data)
-    await createNote({ ...note, mode: mode.value })
+    const id = await createNote({ ...note, mode: mode.value })
+    if (intent.value === 'process') {
+      // The note's page starts processing and shows the result.
+      await navigateTo(`/notes/${id}?process=1`)
+      return
+    }
     toast.add({ title: 'Not kaydedildi', color: 'success', icon: 'i-lucide-check' })
     await navigateTo('/notes')
   } catch (error) {
@@ -73,15 +80,31 @@ async function onSubmit(event: FormSubmitEvent<NewNoteInput>) {
       </template>
     </UFormField>
 
-    <UButton
-      type="submit"
-      size="xl"
-      block
-      class="bg-brand-gradient"
-      :loading="saving"
-      :disabled="!ready"
-    >
-      Notu kaydet
-    </UButton>
+    <div class="grid gap-3 sm:grid-cols-2">
+      <UButton
+        type="submit"
+        size="xl"
+        block
+        color="neutral"
+        variant="outline"
+        :loading="saving && intent === 'save'"
+        :disabled="!ready || saving"
+        @click="intent = 'save'"
+      >
+        Notu kaydet
+      </UButton>
+      <UButton
+        type="submit"
+        size="xl"
+        block
+        class="bg-brand-gradient"
+        icon="i-lucide-sparkles"
+        :loading="saving && intent === 'process'"
+        :disabled="!ready || saving"
+        @click="intent = 'process'"
+      >
+        Görevleri çıkar
+      </UButton>
+    </div>
   </UForm>
 </template>

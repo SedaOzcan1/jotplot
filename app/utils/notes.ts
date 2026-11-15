@@ -39,7 +39,28 @@ export interface NoteListItem {
   title: string | null
   raw_text: string | null
   type: string
+  status: string
   created_at: string
+  /** The note's summary, if it was processed (at most one). */
+  summaries: { decisions: unknown; proposed_tasks: unknown }[] | null
+  /** Number of tasks added to a board from this note. */
+  tasks: { count: number }[] | null
+}
+
+/** Short status line for a note card: "3 görev · 2 karar", "İşleniyor…", and so on. */
+export function noteStatusLine(note: Pick<NoteListItem, 'status' | 'summaries' | 'tasks'>) {
+  const summary = note.summaries?.[0]
+  if (!summary) {
+    return note.status === 'processing'
+      ? 'İşleniyor…'
+      : note.status === 'failed'
+        ? 'İşlenemedi'
+        : 'Henüz işlenmedi'
+  }
+  const count = (value: unknown) => (Array.isArray(value) ? value.length : 0)
+  const tasks = (note.tasks?.[0]?.count ?? 0) + count(summary.proposed_tasks)
+  const decisions = count(summary.decisions)
+  return decisions ? `${tasks} görev · ${decisions} karar` : `${tasks} görev`
 }
 
 /** Title shown in lists: the note's title, else its first non-empty line, else a placeholder. */
