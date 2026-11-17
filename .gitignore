@@ -32,3 +32,6 @@ test-results
 
 # Signed-in browser state saved by Playwright
 test/e2e/.auth
+
+# AI quality check results (npm run eval:ai)
+evals/note-analysis/results/

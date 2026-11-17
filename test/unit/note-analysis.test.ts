@@ -5,6 +5,7 @@ import {
   costUsd,
   DEFAULT_ANALYSIS_MODEL,
   type MessagesClient,
+  fixCapitalDottedI,
   normalizeAnalysis,
   resolveAnalysisModel,
   SYSTEM_PROMPTS,
@@ -209,5 +210,39 @@ describe('prompts and settings', () => {
 
   it('computes cost in dollars from tokens', () => {
     expect(costUsd('claude-haiku-5-5', 1_000_000, 1_000_000)).toBe(0.6)
+  })
+})
+
+describe('fixCapitalDottedI', () => {
+  const note =
+    'Selin iade nedenlerini araştıracak. İnternet teklifi alınacak. Instagram hesabı açılacak.'
+
+  it('writes İ for words the note spells with a dotted i', () => {
+    expect(fixCapitalDottedI('Iade nedenlerini araştır', note)).toBe('İade nedenlerini araştır')
+    expect(fixCapitalDottedI('Ödeme ve Internet teklifi', note)).toBe('Ödeme ve İnternet teklifi')
+  })
+
+  it('leaves other words alone', () => {
+    expect(fixCapitalDottedI('Instagram hesabını aç', note)).toBe('Instagram hesabını aç')
+    expect(fixCapitalDottedI('IP adresini kontrol et', note)).toBe('IP adresini kontrol et')
+    expect(fixCapitalDottedI('Iade', 'Not metni')).toBe('Iade')
+  })
+
+  it('is applied to every text field of the analysis', () => {
+    const analysis = normalizeAnalysis(
+      {
+        summary: 'Iade oranı arttı.',
+        decisions: ['Iade süreci değişecek'],
+        concepts: [],
+        questions: ['Iade neden arttı?'],
+        tasks: [{ title: 'Iade raporu hazırla', type: 'task', assignee: null, due_date: null }],
+      },
+      'work',
+      note,
+    )
+    expect(analysis.summary).toBe('İade oranı arttı.')
+    expect(analysis.decisions).toEqual(['İade süreci değişecek'])
+    expect(analysis.questions).toEqual(['İade neden arttı?'])
+    expect(analysis.tasks[0]!.title).toBe('İade raporu hazırla')
   })
 })
