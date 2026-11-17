@@ -167,11 +167,28 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "approve_summary":
+            "ai_request_limit":
+{ Args: { "p_plan": string }; Returns: number
+                           },
+"approve_summary":
 { Args: { "p_concepts": Json,"p_decisions": Json,"p_questions": Json,"p_summary": string,"p_summary_id": string,"p_tasks": Json }; Returns: number
+                           },
+"current_usage_period":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
+"get_my_ai_usage":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "period": string,"plan": string,"request_limit": number,"used": number
+            }[]
                            },
 "record_ai_usage":
 { Args: { "p_cost_usd": number,"p_tokens_in": number,"p_tokens_out": number,"p_user_id": string }; Returns: undefined
+                           },
+"release_ai_request":
+{ Args: { "p_user_id": string }; Returns: undefined
+                           },
+"reserve_ai_request":
+{ Args: { "p_user_id": string }; Returns: boolean
                            },
 "search_normalize":
 { Args: { "p_text": string }; Returns: string

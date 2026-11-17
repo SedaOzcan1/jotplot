@@ -70,6 +70,15 @@ Deno.serve(
     model: resolveAnalysisModel(Deno.env.get('NOTE_ANALYSIS_MODEL')),
     userScope,
     analyze: (input) => analyzeNote(anthropic, input),
+    async reserveRequest(userId) {
+      const { data, error } = await serviceClient.rpc('reserve_ai_request', { p_user_id: userId })
+      if (error) throw error
+      return data === true
+    },
+    async releaseRequest(userId) {
+      const { error } = await serviceClient.rpc('release_ai_request', { p_user_id: userId })
+      if (error) throw error
+    },
     async recordUsage(userId, usage) {
       const { error } = await serviceClient.rpc('record_ai_usage', {
         p_user_id: userId,
