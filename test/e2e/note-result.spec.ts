@@ -1,15 +1,18 @@
-import { expect, test, type Page, type Route } from '@playwright/test'
-import { createTestUser, signInThroughForm, signedOut } from './helpers'
+import { expect, test, type Page } from '@playwright/test'
+import {
+  CORS_HEADERS as CORS,
+  createTestUser,
+  fakeProcessNote,
+  PROCESS_NOTE_URL as FUNCTION_URL,
+  signInThroughForm,
+  signedOut,
+} from './helpers'
 
 // Each test uses its own user. The AI function is replaced by a stand-in that saves a fixed
 // result for the user, so tests never call Claude.
 test.use({ storageState: signedOut })
 
-type TestUser = Awaited<ReturnType<typeof createTestUser>>
-
 const NOTE_TEXT = 'Kampanya toplantısı: Elif görselleri cumaya hazırlayacak. Lansman ertelendi.'
-const FUNCTION_URL = '**/functions/v1/process-note'
-const CORS = { 'Access-Control-Allow-Origin': '*' }
 
 async function signInAsNewUser(page: Page) {
   const user = await createTestUser('result')
@@ -17,37 +20,6 @@ async function signInAsNewUser(page: Page) {
   await signInThroughForm(page, user.email, user.password)
   await expect(page).toHaveURL(/\/notes$/)
   return user
-}
-
-/** Stands in for the process-note function: saves a result the way the real one does. */
-function fakeProcessNote(user: TestUser) {
-  return async (route: Route) => {
-    if (route.request().method() === 'OPTIONS') {
-      return route.fulfill({
-        status: 200,
-        headers: { ...CORS, 'Access-Control-Allow-Headers': '*' },
-      })
-    }
-    const { sourceId } = route.request().postDataJSON() as { sourceId: string }
-    const analysis = {
-      summary: 'Lansman iki hafta ertelendi.',
-      decisions: ['Lansman ertelendi'],
-      concepts: [],
-      questions: ['Ajans kim olacak?'],
-      proposed_tasks: [
-        { title: 'Görselleri hazırla', type: 'task', assignee: 'Elif', due_date: '2026-11-20' },
-        { title: 'Bütçeyi güncelle', type: 'task', assignee: null, due_date: null },
-      ],
-    }
-    const saved = await user.supabase
-      .from('summaries')
-      .upsert({ source_id: sourceId, ...analysis }, { onConflict: 'source_id' })
-      .select('id')
-      .single()
-    if (saved.error) throw saved.error
-    await user.supabase.from('sources').update({ status: 'ready' }).eq('id', sourceId)
-    await route.fulfill({ json: { sourceId, summaryId: saved.data.id }, headers: CORS })
-  }
 }
 
 async function writeNote(page: Page, button: 'Notu kaydet' | 'Görevleri çıkar') {
