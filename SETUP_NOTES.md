@@ -34,11 +34,23 @@ Bu dosya başlangıçtan itibaren yapılanları, sıradaki adımları ve engelle
     - Birleştirme sırasında `DECISIONS.md`'deki kararlar, "Pending" listesinin altından kararlar tablosuna taşındı.
     - CI'da iki E2E sorunu düzeltildi: form, sayfa hazır olmadan dolduruluyordu; Google testi de yönlendirme yüzünden gerçek Google'a bağlanıyordu. Testler artık Google'a hiç bağlanmıyor.
 
+20. **Faz 1 tamamlandı (PR #12–#20).**
+    - T1.1: Yeni not ekranı ve notlar listesi; metin en fazla 20.000 karakter.
+    - T1.2: `process-note` Edge Function'ı notu Claude Haiku 5.5 ile özet, karar ve görevlere çeviriyor. Seda, console.anthropic.com'da kişisel hesabıyla API anahtarı oluşturdu ve 5 dolarlık aylık harcama sınırı koydu. Anahtar git'e girmeyen `supabase/functions/.env` dosyasında; sohbette paylaşılmadı.
+    - T1.5 ve T1.6: Sonuçlar kaydediliyor; görevler sonuç ekranında düzenlenip "Panoya ekle" ile onaylanınca panoya giriyor.
+    - T1.7: Kanban panosu; masaüstünde sürükle-bırak, mobilde sekmeler ve dokunarak taşıma.
+    - T1.4: Aylık AI limiti (ücretsiz 50, premium 500), Ayarlar'da kullanım kartı.
+    - T1.8: Notlarda Türkçe harflere duyarlı arama ve tür filtreleri.
+    - T1.9: Nottan panoya tek bir uçtan uca E2E testi.
+    - T1.3: `npm run eval:ai` ile 10 sentetik notluk AI kalite testi (10/10 geçti, çalıştırma başına ~$0,013) ve `docs/MANUAL_TESTS.md` elle test rehberi.
+    - Testler gerçek AI'ı hiç çağırmıyor; E2E testlerinde AI yerine sabit sonuç kaydeden bir yedek kullanılıyor.
+    - T1.4 ile T1.8 aynı tip dosyasını değiştirdiği için GitHub'da çakışma göründü; `main` T1.8'e birleştirilerek çözüldü.
+
 ## Sıradaki Adımlar
 
-- Faz 1: T1.1 (not oluşturma ekranı) ile başlamak.
-- T1.2 (Agent Edge Function'ı) için LLM sağlayıcısını Seda ile netleştirmek; karar hâlâ açık.
-- Yayına çıkmadan önce barındırılan bir Supabase projesi ve Google OAuth istemcisinin üretim ayarları gerekecek.
+- Faz 2: T2.1 ile başlamak. Whisper ve Deepgram'ı Türkçe örnek kayıtlarla karşılaştırmak (kalite, konuşmacı ayrımı, zaman damgası, maliyet); sağlayıcı kararı Seda'da.
+- Öğrenci modu arayüzde hâlâ "yakında"; ne zaman açılacağı Seda ile netleşecek.
+- Yayına çıkmadan önce barındırılan bir Supabase projesi, Google OAuth'un üretim ayarları ve Edge Function için üretim API anahtarı gerekecek.
 
 ## Bilgilendirme Şekli
 
