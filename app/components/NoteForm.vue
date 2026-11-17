@@ -3,6 +3,11 @@ import type { FormSubmitEvent } from '@nuxt/ui'
 import type { NewNoteInput } from '~/utils/notes'
 
 const { createNote } = useNotes()
+const { getAiUsage } = useAiUsage()
+// Shown before the user writes; the server still enforces the limit.
+const { data: usage } = useAsyncData('ai-usage', () => getAiUsage(), { server: false })
+const limitReached = computed(() => !!usage.value && aiUsageLevel(usage.value) === 'reached')
+const usageMessage = computed(() => (usage.value ? aiUsageMessage(usage.value) : null))
 const { mode } = useAppMode()
 const toast = useToast()
 const ready = useIsMounted()
@@ -49,6 +54,14 @@ async function onSubmit(event: FormSubmitEvent<NewNoteInput>) {
       variant="subtle"
       icon="i-lucide-circle-alert"
       :description="errorMessage"
+    />
+
+    <UAlert
+      v-if="usageMessage"
+      :color="limitReached ? 'warning' : 'info'"
+      variant="subtle"
+      icon="i-lucide-gauge"
+      :description="usageMessage"
     />
 
     <ModeSwitch label="Notun modu" />
@@ -100,7 +113,7 @@ async function onSubmit(event: FormSubmitEvent<NewNoteInput>) {
         class="bg-brand-gradient"
         icon="i-lucide-sparkles"
         :loading="saving && intent === 'process'"
-        :disabled="!ready || saving"
+        :disabled="!ready || saving || limitReached"
         @click="intent = 'process'"
       >
         Görevleri çıkar

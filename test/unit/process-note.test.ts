@@ -16,6 +16,8 @@ let deps: ProcessNoteDeps & {
   setStatus: ReturnType<typeof vi.fn>
   saveSummary: ReturnType<typeof vi.fn>
   analyze: ReturnType<typeof vi.fn>
+  reserveRequest: ReturnType<typeof vi.fn>
+  releaseRequest: ReturnType<typeof vi.fn>
   recordUsage: ReturnType<typeof vi.fn>
 }
 
@@ -30,6 +32,8 @@ beforeEach(() => {
         ? { userId: 'user-1', loadNote: async () => note, setStatus, saveSummary }
         : null,
     analyze: vi.fn().mockResolvedValue({ analysis, usage }),
+    reserveRequest: vi.fn().mockResolvedValue(true),
+    releaseRequest: vi.fn().mockResolvedValue(undefined),
     recordUsage: vi.fn().mockResolvedValue(undefined),
     setStatus,
     saveSummary,
@@ -129,6 +133,62 @@ describe('process-note', () => {
     expect(await errorCode(response)).toBe('internal')
     expect(deps.recordUsage).toHaveBeenCalled()
     expect(deps.setStatus).toHaveBeenLastCalledWith(SOURCE_ID, 'failed')
+  })
+
+  it('counts the request before running the AI', async () => {
+    await post({ sourceId: SOURCE_ID })
+
+    expect(deps.reserveRequest).toHaveBeenCalledWith('user-1')
+    expect(deps.reserveRequest.mock.invocationCallOrder[0]).toBeLessThan(
+      deps.analyze.mock.invocationCallOrder[0]!,
+    )
+    expect(deps.releaseRequest).not.toHaveBeenCalled()
+  })
+
+  it('stops with a clear message when the monthly limit is reached', async () => {
+    deps.reserveRequest.mockResolvedValue(false)
+
+    const response = await post({ sourceId: SOURCE_ID })
+
+    expect(response.status).toBe(429)
+    const body = (await response.json()) as { error: { code: string; message: string } }
+    expect(body.error.code).toBe('limit_reached')
+    expect(body.error.message).toContain('Notun kaydedildi')
+    expect(deps.analyze).not.toHaveBeenCalled()
+    // The note keeps its status, so it can be processed next month.
+    expect(deps.setStatus).not.toHaveBeenCalled()
+  })
+
+  it('does not check the limit for a note the user cannot see', async () => {
+    note = null
+
+    await post({ sourceId: SOURCE_ID })
+
+    expect(deps.reserveRequest).not.toHaveBeenCalled()
+  })
+
+  it('gives the request back when the AI service could not be reached', async () => {
+    deps.analyze.mockRejectedValue(new Anthropic.APIConnectionError({ message: 'offline' }))
+
+    await post({ sourceId: SOURCE_ID })
+
+    expect(deps.releaseRequest).toHaveBeenCalledWith('user-1')
+  })
+
+  it('keeps the request counted when the AI answered but saving failed', async () => {
+    deps.saveSummary.mockRejectedValue(new Error('db down'))
+
+    await post({ sourceId: SOURCE_ID })
+
+    expect(deps.releaseRequest).not.toHaveBeenCalled()
+  })
+
+  it('keeps the request counted when the AI answer was unusable', async () => {
+    deps.analyze.mockResolvedValue({ usage, error: new AnalysisError('ai_invalid_output', 'bad') })
+
+    await post({ sourceId: SOURCE_ID })
+
+    expect(deps.releaseRequest).not.toHaveBeenCalled()
   })
 
   it('reports a rate limit or network error as temporary', async () => {

@@ -3,13 +3,15 @@ import { flushPromises } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import NoteForm from '~/components/NoteForm.vue'
 
-const { notesMock, navigateToMock } = vi.hoisted(() => ({
+const { notesMock, navigateToMock, usageMock } = vi.hoisted(() => ({
   notesMock: { createNote: vi.fn(), listNotes: vi.fn() },
   navigateToMock: vi.fn(),
+  usageMock: { getAiUsage: vi.fn() },
 }))
 
 mockNuxtImport('useNotes', () => () => notesMock)
 mockNuxtImport('navigateTo', () => navigateToMock)
+mockNuxtImport('useAiUsage', () => () => usageMock)
 
 type Wrapper = Awaited<ReturnType<typeof mountSuspended>>
 
@@ -34,6 +36,13 @@ async function fillAndSubmit(
 describe('NoteForm', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    usageMock.getAiUsage.mockResolvedValue({
+      used: 0,
+      limit: 50,
+      plan: 'free',
+      period: '2026-11-01',
+    })
+    clearNuxtData('ai-usage')
   })
 
   it('does not save an empty note and explains why', async () => {
@@ -88,5 +97,36 @@ describe('NoteForm', () => {
     await wrapper.find('textarea').setValue('a'.repeat(1234))
 
     expect(wrapper.text()).toContain('1.234 / 20.000 karakter')
+  })
+
+  it('disables "Görevleri çıkar" and explains why when the monthly limit is reached', async () => {
+    usageMock.getAiUsage.mockResolvedValue({
+      used: 50,
+      limit: 50,
+      plan: 'free',
+      period: '2026-11-01',
+    })
+    const wrapper = await mountSuspended(NoteForm)
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Bu ayki 50 AI işleme hakkını doldurdun')
+    const buttons = wrapper.findAll('button[type="submit"]')
+    const process = buttons.find((b: { text(): string }) => b.text().includes('Görevleri çıkar'))
+    const save = buttons.find((b: { text(): string }) => b.text().includes('Notu kaydet'))
+    expect(process!.attributes('disabled')).toBeDefined()
+    expect(save!.attributes('disabled')).toBeUndefined()
+  })
+
+  it('warns when few requests are left', async () => {
+    usageMock.getAiUsage.mockResolvedValue({
+      used: 46,
+      limit: 50,
+      plan: 'free',
+      period: '2026-11-01',
+    })
+    const wrapper = await mountSuspended(NoteForm)
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Bu ay 4 AI işleme hakkın kaldı')
   })
 })
