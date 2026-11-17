@@ -202,15 +202,15 @@ Her görev Bölüm 8'deki **"tamamlandı" tanımına** uymalı.
 - [x] **T0.7 Test ve CI** (T0.1) — Vitest ve Playwright kurulumu, GitHub Actions: lint + type check + test.
 
 ### Faz 1 — Nottan göreve
-- [ ] **T1.1 Not oluşturma ekranı** (T0.4, T0.6) — Metin girişi, başlık, mod seçimi, `sources` tablosuna kayıt.
-- [ ] **T1.2 Agent Edge Function'ı** (T0.4) — Metin + mod alır, LLM'e gönderir, **Zod şemasına uygun JSON** döner. Mod başına ayrı prompt. Hata yönetimi. Token kullanımını `usage` tablosuna yazar.
-- [ ] **T1.3 AI kalite test seti** (T1.2) — 5–10 örnek not (her iki mod) ve beklenen çıktı özellikleri; prompt değişikliklerinde çalıştırılacak script.
-- [ ] **T1.4 Kullanım limiti** (T1.2) — Plan bazlı limit kontrolü (free için aylık sınır), limit aşımında kullanıcıya anlaşılır mesaj.
-- [ ] **T1.5 Sonuçları kaydetme** (T1.2) — Agent çıktısını `summaries` ve `tasks` tablolarına yazma.
-- [ ] **T1.6 Özet ekranı** (T1.5) — Özet, kararlar / kavramlar, sorular; düzenlenebilir alanlar.
-- [ ] **T1.7 Kanban panosu** (T1.5) — Sürükle-bırak, durum güncelleme, görev düzenleme, mobilde kullanılabilir.
-- [ ] **T1.8 Not listesi** (T1.1) — Kullanıcının tüm kaynakları, filtre (mod, tür), arama.
-- [ ] **T1.9 E2E testi** (T1.7) — Giriş → not oluştur → görevleri gör akışı için Playwright testi.
+- [x] **T1.1 Not oluşturma ekranı** (T0.4, T0.6) — Metin girişi, başlık, mod seçimi, `sources` tablosuna kayıt.
+- [x] **T1.2 Agent Edge Function'ı** (T0.4) — Metin + mod alır, LLM'e gönderir, **Zod şemasına uygun JSON** döner. Mod başına ayrı prompt. Hata yönetimi. Token kullanımını `usage` tablosuna yazar.
+- [x] **T1.3 AI kalite test seti** (T1.2) — 5–10 örnek not (her iki mod) ve beklenen çıktı özellikleri; prompt değişikliklerinde çalıştırılacak script.
+- [x] **T1.4 Kullanım limiti** (T1.2) — Plan bazlı limit kontrolü (free için aylık sınır), limit aşımında kullanıcıya anlaşılır mesaj.
+- [x] **T1.5 Sonuçları kaydetme** (T1.2) — Agent çıktısını `summaries` ve `tasks` tablolarına yazma.
+- [x] **T1.6 Özet ekranı** (T1.5) — Özet, kararlar / kavramlar, sorular; düzenlenebilir alanlar.
+- [x] **T1.7 Kanban panosu** (T1.5) — Sürükle-bırak, durum güncelleme, görev düzenleme, mobilde kullanılabilir.
+- [x] **T1.8 Not listesi** (T1.1) — Kullanıcının tüm kaynakları, filtre (mod, tür), arama.
+- [x] **T1.9 E2E testi** (T1.7) — Giriş → not oluştur → görevleri gör akışı için Playwright testi.
 
 ### Faz 2 — Ses
 - [ ] **T2.1 STT servisi seçimi** — Whisper ve Deepgram'ı Türkçe örnek kayıtlarla karşılaştır (kalite, konuşmacı ayrımı, zaman damgası, maliyet). Sonucu `DECISIONS.md`'ye yaz.
