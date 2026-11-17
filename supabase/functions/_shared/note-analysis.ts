@@ -80,12 +80,14 @@ export function buildUserMessage(text: string, today: string): string {
 }
 
 export class AnalysisError extends Error {
-  constructor(
-    readonly code: 'ai_refused' | 'ai_incomplete' | 'ai_invalid_output',
-    message: string,
-  ) {
+  // Declared as a field (not a constructor parameter property) so Node can run this file as
+  // TypeScript directly in the AI quality check (npm run eval:ai).
+  readonly code: 'ai_refused' | 'ai_incomplete' | 'ai_invalid_output'
+
+  constructor(code: AnalysisError['code'], message: string) {
     super(message)
     this.name = 'AnalysisError'
+    this.code = code
   }
 }
 
@@ -95,8 +97,30 @@ function isRealDate(value: string): boolean {
   return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(value)
 }
 
-/** Validates Claude's output and cleans fields that are allowed to be empty. */
-export function normalizeAnalysis(output: unknown, mode: NoteMode): NoteAnalysis {
+/** Words of the note that start with a dotted lowercase "i", such as "iade" or "internet". */
+function dottedIWords(noteText: string): Set<string> {
+  const words = noteText.toLocaleLowerCase('tr-TR').match(/\p{L}+/gu) ?? []
+  return new Set(words.filter((word) => word.startsWith('i')))
+}
+
+/**
+ * Fixes a Turkish capitalization slip: the model sometimes writes "Iade" for "İade". A word is
+ * changed only when the note itself spells it with a dotted "i", so words such as "Instagram"
+ * stay as they are.
+ */
+export function fixCapitalDottedI(text: string, noteText: string): string {
+  const words = dottedIWords(noteText)
+  if (!words.size) return text
+  return text.replace(/(^|[^\p{L}])I(\p{Ll}+)/gu, (match, before: string, rest: string) =>
+    words.has(`i${rest.toLocaleLowerCase('tr-TR')}`) ? `${before}İ${rest}` : match,
+  )
+}
+
+/**
+ * Validates Claude's output and cleans fields that are allowed to be empty. `noteText` is the
+ * original note, used to fix the capital dotted İ.
+ */
+export function normalizeAnalysis(output: unknown, mode: NoteMode, noteText = ''): NoteAnalysis {
   const result = noteAnalysisSchema.safeParse(output)
   if (!result.success) {
     throw new AnalysisError(
@@ -104,16 +128,17 @@ export function normalizeAnalysis(output: unknown, mode: NoteMode): NoteAnalysis
       `Output did not match the schema: ${result.error.message}`,
     )
   }
-  const clean = (items: string[]) => items.map((item) => item.trim()).filter(Boolean)
+  const fix = (text: string) => fixCapitalDottedI(text.trim(), noteText)
+  const clean = (items: string[]) => items.map(fix).filter(Boolean)
   const analysis = result.data
   return {
-    summary: analysis.summary.trim(),
+    summary: fix(analysis.summary),
     decisions: mode === 'student' ? [] : clean(analysis.decisions),
     concepts: mode === 'work' ? [] : clean(analysis.concepts),
     questions: clean(analysis.questions),
     tasks: analysis.tasks
       .map((task) => ({
-        title: task.title.trim(),
+        title: fix(task.title),
         type: mode === 'work' ? ('task' as const) : task.type,
         assignee: task.assignee?.trim() || null,
         // An impossible date is dropped rather than guessed.
@@ -203,7 +228,7 @@ export async function analyzeNote(
     }
   }
   try {
-    return { usage, analysis: normalizeAnalysis(output, input.mode) }
+    return { usage, analysis: normalizeAnalysis(output, input.mode, input.text) }
   } catch (error) {
     if (error instanceof AnalysisError) return { usage, error }
     throw error
