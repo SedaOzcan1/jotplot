@@ -189,7 +189,29 @@ isOneToOne: false
                            },
 "reserve_ai_request":
 { Args: { "p_user_id": string }; Returns: boolean
-                           }
+                           },
+"search_normalize":
+{ Args: { "p_text": string }; Returns: string
+                           },
+"search_notes":
+{ Args: { "p_mode"?: string,"p_query"?: string,"p_type"?: string }; Returns: {
+              "created_at": string,
+"id": string,
+"mode": string,
+"raw_text": string | null,
+"status": string,
+"storage_path": string | null,
+"title": string | null,
+"type": string,
+"updated_at": string,
+"user_id": string
+            }[]
+                          SetofOptions: {
+        from: "*"
+        to: "sources"
+        isOneToOne: false
+        isSetofReturn: true
+      } }
           }
           Enums: {
             [_ in never]: never

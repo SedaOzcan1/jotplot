@@ -34,6 +34,26 @@ export function validateNewNote(values: Partial<NewNoteInput>) {
   }))
 }
 
+export const NOTE_TYPES = ['text', 'audio', 'pdf'] as const
+export type NoteType = (typeof NOTE_TYPES)[number]
+
+export const NOTE_TYPE_LABELS: Record<NoteType, string> = {
+  text: 'Metin',
+  audio: 'Ses',
+  pdf: 'PDF',
+}
+
+export interface NoteFilters {
+  query?: string
+  type?: NoteType | null
+  mode?: AppMode | null
+}
+
+/** Reads the type filter from the URL; anything unknown means "Tümü". */
+export function parseNoteType(value: unknown): NoteType | null {
+  return NOTE_TYPES.includes(value as NoteType) ? (value as NoteType) : null
+}
+
 export interface NoteListItem {
   id: string
   title: string | null
