@@ -24,14 +24,18 @@ const { data, status, error, refresh } = useAsyncData(
 
 const processing = ref(false)
 const processError = ref<string | null>(null)
+/** The monthly AI limit is reached: retrying would fail again until next month. */
+const limitReached = ref(false)
 
 async function runProcessing() {
   if (processing.value) return
   processing.value = true
   processError.value = null
+  limitReached.value = false
   try {
     await processNote(id.value)
   } catch (err) {
+    limitReached.value = err instanceof ProcessNoteError && err.code === 'limit_reached'
     processError.value =
       err instanceof ProcessNoteError
         ? err.message
@@ -126,6 +130,20 @@ const showFailure = computed(
           Özet, kararlar ve görevler çıkarılıyor. Bu genelde birkaç saniye sürer.
         </p>
       </div>
+
+      <template v-else-if="showFailure && limitReached">
+        <UAlert
+          role="alert"
+          color="warning"
+          variant="subtle"
+          icon="i-lucide-gauge"
+          title="Bu ayki AI hakkın doldu"
+          :description="processError ?? undefined"
+        />
+        <UButton to="/settings" size="xl" block color="neutral" variant="outline">
+          Kullanımı gör
+        </UButton>
+      </template>
 
       <template v-else-if="showFailure">
         <UAlert

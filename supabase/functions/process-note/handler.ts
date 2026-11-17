@@ -30,6 +30,7 @@ export type ErrorCode =
   | 'not_signed_in'
   | 'note_not_found'
   | 'unsupported_note'
+  | 'limit_reached'
   | 'ai_refused'
   | 'ai_incomplete'
   | 'ai_invalid_output'
@@ -41,6 +42,11 @@ const ERRORS: Record<ErrorCode, { status: number; message: string }> = {
   not_signed_in: { status: 401, message: 'Oturumun sona ermiş. Tekrar giriş yap.' },
   note_not_found: { status: 404, message: 'Not bulunamadı.' },
   unsupported_note: { status: 422, message: 'Bu not türü henüz işlenemiyor.' },
+  limit_reached: {
+    status: 429,
+    message:
+      'Bu ayki AI işleme hakkını doldurdun. Notun kaydedildi; hakkın gelecek ayın ilk günü yenilenir.',
+  },
   ai_refused: {
     status: 422,
     message: 'Bu not işlenemedi. Metni gözden geçirip tekrar dene.',
@@ -95,6 +101,10 @@ export interface ProcessNoteDeps {
   /** Returns null when the access token is missing or invalid. */
   userScope(authorization: string | null): Promise<UserScope | null>
   analyze(input: AnalyzeNoteInput): Promise<AnalyzeNoteResult>
+  /** Counts one AI request; false when the user's monthly limit is reached. Service role. */
+  reserveRequest(userId: string): Promise<boolean>
+  /** Gives back a counted request when the AI never ran. Service role. */
+  releaseRequest(userId: string): Promise<void>
   /** Runs with the service role; users cannot write usage themselves. */
   recordUsage(userId: string, usage: AnalysisUsage): Promise<void>
   now?: () => Date
@@ -127,7 +137,6 @@ export function createHandler(deps: ProcessNoteDeps) {
     let note: Note | null
     try {
       note = await scope.loadNote(sourceId)
-      if (note?.type === 'text' && note.raw_text) await scope.setStatus(sourceId, 'processing')
     } catch (error) {
       log('Loading the note failed', { sourceId, error: String(error) })
       return errorResponse('internal')
@@ -135,6 +144,16 @@ export function createHandler(deps: ProcessNoteDeps) {
     if (!note) return errorResponse('note_not_found')
     if (note.type !== 'text' || !note.raw_text) return errorResponse('unsupported_note')
 
+    // The request is counted before the AI runs so parallel requests cannot pass the limit.
+    try {
+      if (!(await deps.reserveRequest(scope.userId))) return errorResponse('limit_reached')
+      await scope.setStatus(sourceId, 'processing')
+    } catch (error) {
+      log('Checking the usage limit failed', { sourceId, error: String(error) })
+      return errorResponse('internal')
+    }
+
+    let aiRan = false
     try {
       const result = await deps.analyze({
         text: note.raw_text,
@@ -142,6 +161,7 @@ export function createHandler(deps: ProcessNoteDeps) {
         model: deps.model,
         today: todayInIstanbul(deps.now?.() ?? new Date()),
       })
+      aiRan = true
 
       try {
         await deps.recordUsage(scope.userId, result.usage)
@@ -162,6 +182,12 @@ export function createHandler(deps: ProcessNoteDeps) {
       return json({ sourceId, summaryId, analysis: result.analysis })
     } catch (error) {
       log('Processing a note failed', { sourceId, error: String(error) })
+      // Nothing was billed when the AI never answered, so the request does not count.
+      if (!aiRan) {
+        await deps.releaseRequest(scope.userId).catch((releaseError: unknown) => {
+          log('Giving back an AI request failed', { sourceId, error: String(releaseError) })
+        })
+      }
       await scope.setStatus(sourceId, 'failed').catch(() => {})
       return errorResponse(isTemporaryApiError(error) ? 'ai_unavailable' : 'internal')
     }

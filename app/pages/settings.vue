@@ -20,10 +20,12 @@ const email = computed(() => (typeof user.value?.email === 'string' ? user.value
       <SignOutButton />
     </section>
 
+    <AiUsageCard />
+
     <EmptyState
       icon="i-lucide-settings"
       title="Diğer ayarlar hazırlanıyor"
-      description="Kullanım, gizlilik ve hesap silme ayarları sonraki adımlarda burada olacak."
+      description="Gizlilik ve hesap silme ayarları sonraki adımlarda burada olacak."
     />
   </div>
 </template>
