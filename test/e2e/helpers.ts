@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { expect, type Page } from '@playwright/test'
+import { expect, type Page, type Route } from '@playwright/test'
 
 /** Signed-in browser state shared by the desktop and mobile projects (git-ignored). */
 export const authFile = 'test/e2e/.auth/user.json'
@@ -45,4 +45,43 @@ export const signedOut = { cookies: [], origins: [] }
 export async function expectOnLogin(page: Page) {
   await expect(page).toHaveURL(/\/login$/)
   await expect(page.getByRole('heading', { level: 1, name: 'Tekrar hoş geldin' })).toBeVisible()
+}
+
+export type TestUser = Awaited<ReturnType<typeof createTestUser>>
+
+export const PROCESS_NOTE_URL = '**/functions/v1/process-note'
+export const CORS_HEADERS = { 'Access-Control-Allow-Origin': '*' }
+
+/**
+ * Stands in for the process-note Edge Function so tests never call Claude: saves a fixed result
+ * for the note the way the real function does, as the signed-in test user.
+ */
+export function fakeProcessNote(user: TestUser) {
+  return async (route: Route) => {
+    if (route.request().method() === 'OPTIONS') {
+      return route.fulfill({
+        status: 200,
+        headers: { ...CORS_HEADERS, 'Access-Control-Allow-Headers': '*' },
+      })
+    }
+    const { sourceId } = route.request().postDataJSON() as { sourceId: string }
+    const analysis = {
+      summary: 'Lansman iki hafta ertelendi.',
+      decisions: ['Lansman ertelendi'],
+      concepts: [],
+      questions: ['Ajans kim olacak?'],
+      proposed_tasks: [
+        { title: 'Görselleri hazırla', type: 'task', assignee: 'Elif', due_date: '2026-11-20' },
+        { title: 'Bütçeyi güncelle', type: 'task', assignee: null, due_date: null },
+      ],
+    }
+    const saved = await user.supabase
+      .from('summaries')
+      .upsert({ source_id: sourceId, ...analysis }, { onConflict: 'source_id' })
+      .select('id')
+      .single()
+    if (saved.error) throw saved.error
+    await user.supabase.from('sources').update({ status: 'ready' }).eq('id', sourceId)
+    await route.fulfill({ json: { sourceId, summaryId: saved.data.id }, headers: CORS_HEADERS })
+  }
 }
