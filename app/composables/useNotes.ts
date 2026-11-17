@@ -1,7 +1,7 @@
-import type { NewNote, NoteListItem } from '~/utils/notes'
+import type { NewNote, NoteFilters, NoteListItem } from '~/utils/notes'
 
-/** How many notes the list shows until search and paging arrive in T1.8. */
-export const NOTE_LIST_LIMIT = 50
+/** How many notes the list loads at a time; "Daha fazla göster" loads the next page. */
+export const NOTE_LIST_LIMIT = 30
 
 function toNoteServiceError(error: { code?: string | null }) {
   // 42501: permission denied, which is what a request without a valid session gets.
@@ -30,16 +30,21 @@ export function useNotes() {
     return data.id
   }
 
-  async function listNotes(): Promise<NoteListItem[]> {
+  /** One page of notes, newest first, matching the search text, type, and mode. */
+  async function listNotes(filters: NoteFilters = {}, offset = 0): Promise<NoteListItem[]> {
     const { data, error } = await supabase
-      .from('sources')
+      .rpc('search_notes', {
+        p_query: filters.query?.trim() || undefined,
+        p_type: filters.type ?? undefined,
+        p_mode: filters.mode ?? undefined,
+      })
       .select(
         'id, title, raw_text, type, status, created_at, summaries(decisions, proposed_tasks), tasks(count)',
       )
       .order('created_at', { ascending: false })
-      .limit(NOTE_LIST_LIMIT)
+      .range(offset, offset + NOTE_LIST_LIMIT - 1)
     if (error) throw toNoteServiceError(error)
-    return data as NoteListItem[]
+    return data as unknown as NoteListItem[]
   }
 
   return { createNote, listNotes }

@@ -6,6 +6,7 @@ import {
   noteDisplayTitle,
   noteErrorMessage,
   NoteServiceError,
+  parseNoteType,
   validateNewNote,
 } from '~/utils/notes'
 
@@ -91,5 +92,14 @@ describe('noteErrorMessage', () => {
     expect(noteErrorMessage(new NoteServiceError('unknown'), 'load')).toBe(
       'Notlar yüklenemedi. Bağlantını kontrol edip tekrar dene.',
     )
+  })
+})
+
+describe('parseNoteType', () => {
+  it('accepts known note types and treats anything else as all types', () => {
+    expect(parseNoteType('audio')).toBe('audio')
+    expect(parseNoteType('video')).toBeNull()
+    expect(parseNoteType(['text'])).toBeNull()
+    expect(parseNoteType(undefined)).toBeNull()
   })
 })

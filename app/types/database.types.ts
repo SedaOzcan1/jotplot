@@ -172,7 +172,29 @@ isOneToOne: false
                            },
 "record_ai_usage":
 { Args: { "p_cost_usd": number,"p_tokens_in": number,"p_tokens_out": number,"p_user_id": string }; Returns: undefined
-                           }
+                           },
+"search_normalize":
+{ Args: { "p_text": string }; Returns: string
+                           },
+"search_notes":
+{ Args: { "p_mode"?: string,"p_query"?: string,"p_type"?: string }; Returns: {
+              "created_at": string,
+"id": string,
+"mode": string,
+"raw_text": string | null,
+"status": string,
+"storage_path": string | null,
+"title": string | null,
+"type": string,
+"updated_at": string,
+"user_id": string
+            }[]
+                          SetofOptions: {
+        from: "*"
+        to: "sources"
+        isOneToOne: false
+        isSetofReturn: true
+      } }
           }
           Enums: {
             [_ in never]: never
