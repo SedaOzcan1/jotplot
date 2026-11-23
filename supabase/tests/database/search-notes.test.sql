@@ -10,11 +10,16 @@ values
   ('99999999-9999-4999-8999-999999999999', 'search-a@example.test'),
   ('98989898-9898-4898-8898-989898989898', 'search-b@example.test');
 
+insert into public.sources (user_id, id, type, mode, title, consent_confirmed_at, storage_path)
+values
+  ('99999999-9999-4999-8999-999999999999', '97979797-9797-4797-8797-979797979797', 'audio', 'work',
+   'Ses kaydı', now(),
+   '99999999-9999-4999-8999-999999999999/97979797-9797-4797-8797-979797979797.webm');
+
 insert into public.sources (user_id, type, mode, title, raw_text)
 values
   ('99999999-9999-4999-8999-999999999999', 'text', 'work', 'İstanbul ofisi', 'Taşınma planı'),
   ('99999999-9999-4999-8999-999999999999', 'text', 'work', null, 'Bütçe %20 artırıldı; IŞIK projesi'),
-  ('99999999-9999-4999-8999-999999999999', 'audio', 'work', 'Ses kaydı', null),
   ('99999999-9999-4999-8999-999999999999', 'text', 'student', 'Ders notu', 'Türev konusu'),
   ('98989898-9898-4898-8898-989898989898', 'text', 'work', 'B İstanbul notu', 'Gizli');
 

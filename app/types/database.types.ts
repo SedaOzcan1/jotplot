@@ -69,14 +69,14 @@ isOneToOne: false
                   ]
                 },"sources": {
                   Row: {
-                    "created_at": string,"id": string,"mode": string,"raw_text": string | null,"status": string,"storage_path": string | null,"title": string | null,"type": string,"updated_at": string,"user_id": string
+                    "consent_confirmed_at": string | null,"created_at": string,"id": string,"mode": string,"raw_text": string | null,"status": string,"storage_path": string | null,"title": string | null,"type": string,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id"?: string,"mode"?: string,"raw_text"?: string | null,"status"?: string,"storage_path"?: string | null,"title"?: string | null,"type": string,"updated_at"?: string,"user_id"?: string
+                    "consent_confirmed_at"?: string | null,"created_at"?: string,"id"?: string,"mode"?: string,"raw_text"?: string | null,"status"?: string,"storage_path"?: string | null,"title"?: string | null,"type": string,"updated_at"?: string,"user_id"?: string
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"mode"?: string,"raw_text"?: string | null,"status"?: string,"storage_path"?: string | null,"title"?: string | null,"type"?: string,"updated_at"?: string,"user_id"?: string
+                    "consent_confirmed_at"?: string | null,"created_at"?: string,"id"?: string,"mode"?: string,"raw_text"?: string | null,"status"?: string,"storage_path"?: string | null,"title"?: string | null,"type"?: string,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     
@@ -195,7 +195,8 @@ isOneToOne: false
                            },
 "search_notes":
 { Args: { "p_mode"?: string,"p_query"?: string,"p_type"?: string }; Returns: {
-              "created_at": string,
+              "consent_confirmed_at": string | null,
+"created_at": string,
 "id": string,
 "mode": string,
 "raw_text": string | null,

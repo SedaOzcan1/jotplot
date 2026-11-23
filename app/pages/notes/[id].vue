@@ -110,7 +110,20 @@ const showFailure = computed(
         </p>
       </header>
 
-      <details class="rounded-xl bg-white ring-1 ring-navy-100">
+      <div
+        v-if="note.type === 'audio'"
+        role="status"
+        class="flex flex-col items-center gap-3 rounded-xl bg-white px-4 py-10 text-center ring-1 ring-navy-100"
+      >
+        <UIcon name="i-lucide-file-audio" class="size-8 text-navy-500" aria-hidden="true" />
+        <p class="font-semibold text-navy-900">Kayıt yüklendi</p>
+        <p class="max-w-md text-sm text-slate-500">
+          Kaydın güvenle saklanıyor. Yazıya dökülmesi ve görevlerin çıkarılması bir sonraki adımda
+          bu sayfada görünecek.
+        </p>
+      </div>
+
+      <details v-else-if="note.raw_text" class="rounded-xl bg-white ring-1 ring-navy-100">
         <summary class="cursor-pointer px-4 py-3 text-sm font-medium text-navy-900">
           Notun metni
         </summary>
@@ -119,8 +132,10 @@ const showFailure = computed(
         </p>
       </details>
 
+      <template v-if="note.type === 'audio'" />
+
       <div
-        v-if="processing && !summary"
+        v-else-if="processing && !summary"
         role="status"
         class="flex flex-col items-center gap-3 rounded-xl bg-white px-4 py-10 text-center ring-1 ring-navy-100"
       >

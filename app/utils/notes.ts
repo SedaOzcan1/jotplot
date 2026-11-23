@@ -83,10 +83,17 @@ export function noteStatusLine(note: Pick<NoteListItem, 'status' | 'summaries' |
   return decisions ? `${tasks} görev · ${decisions} karar` : `${tasks} görev`
 }
 
-/** Title shown in lists: the note's title, else its first non-empty line, else a placeholder. */
-export function noteDisplayTitle(note: Pick<NoteListItem, 'title' | 'raw_text'>, maxLength = 80) {
+/**
+ * Title shown in lists: the note's title, else its first non-empty line, else a placeholder
+ * ("Ses kaydı" for a recording without a title).
+ */
+export function noteDisplayTitle(
+  note: Pick<NoteListItem, 'title' | 'raw_text'> & { type?: string },
+  maxLength = 80,
+) {
   const title = note.title?.trim()
   if (title) return title
+  if (note.type === 'audio' && !note.raw_text?.trim()) return 'Ses kaydı'
   const firstLine = note.raw_text
     ?.split('\n')
     .map((line) => line.trim())
