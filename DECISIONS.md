@@ -57,10 +57,10 @@ Confirmed decisions are recorded here with their date and rationale. Pending que
 | 2026-11-23 | The recording and its transcript are shown on the note page: a player at the top, then a collapsible transcript with one paragraph per speaker turn ("Konuşmacı 1", "Konuşmacı 2" when more than one speaker is found); a turn's time jumps the player to that moment | Seda chose a section on the note page over a separate transcript page, so the recording, transcript, and tasks stay together. |
 | 2026-11-23 | A board card's left stripe shows how close its due date is: red when overdue, amber for today or tomorrow, turquoise otherwise, grey when done; the date badge also says "Gecikti", "Bugün", or "Yarın". Dates follow Turkish time | Seda asked for coloured stripes. A colour per column would repeat what the column already shows, so the colour carries the due date instead; the words keep it readable without colour. Replaces the turquoise-only stripe from the color direction. |
 | 2026-11-23 | A card from a note shows a small link under it with the note type's icon and the note's title, opening the note | Seda asked to show where a task came from; it was only visible inside the task dialog before. Tasks added by hand have no link. |
+| 2026-11-24 | Voyage `voyage-4` (1024 dimensions) creates the embeddings for search and questions (T3.2); stored text uses `input_type: document`, questions `query` | Seda chose it after `npm run eval:embeddings` compared it with OpenAI `text-embedding-3-small` and `-3-large` and Voyage 4 lite and large on Turkish passages (see `docs/EMBEDDING_COMPARISON.md`): it ranked every answer first, at $0.06 per million tokens. Before any personal data is sent, Voyage's data retention must be turned off in its dashboard (needs a payment method; cannot be undone). |
 
 ## Pending
 
-- Embedding provider.
 - Analytics provider.
 - F4 integration scope and provider details.
 - Faz 5 payment provider and pricing.

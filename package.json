@@ -27,7 +27,8 @@
     "db:types": "supabase gen types typescript --local --schema public > app/types/database.types.ts",
     "functions:serve": "supabase functions serve --env-file supabase/functions/.env",
     "eval:ai": "node evals/note-analysis/run.ts",
-    "eval:stt": "node evals/stt/run.ts"
+    "eval:stt": "node evals/stt/run.ts",
+    "eval:embeddings": "node evals/embeddings/run.ts"
   },
   "dependencies": {
     "@iconify-json/lucide": "1.2.148",

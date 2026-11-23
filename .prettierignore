@@ -9,3 +9,4 @@ PROJECT.md
 app/types/database.types.ts
 evals/stt/results
 evals/stt/recordings
+evals/embeddings/results
