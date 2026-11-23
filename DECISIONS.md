@@ -45,11 +45,11 @@ Confirmed decisions are recorded here with their date and rationale. Pending que
 | 2026-11-13 | The summary, decisions, concepts, and questions are saved as soon as a note is processed; extracted tasks are saved with the summary as proposals and reach the default board's "Yapılacak" column only after the user reviews them and taps "Panoya ekle". Processing a note again replaces its summary and proposals | Seda chose approval first (US-1.3, wireframe 4): the user can fix tasks before they appear on the board. |
 | 2026-11-13 | The new note screen has two buttons: "Notu kaydet" saves and returns to the notes list without AI; "Görevleri çıkar" saves, opens the note's page, and starts processing. A saved note can be processed later from its page; note cards open that page | Seda chose two buttons so notes can be kept without running the AI. Updates the T1.1 decision on where the user goes after saving. |
 | 2026-11-17 | Monthly AI request limits: 50 on the free plan and 500 on premium; processing a note is one request and months follow Turkish time. A request is counted before the AI runs and given back if the AI service cannot be reached | Seda chose 50 for free (about 3 cents per user per month with Claude Haiku 5.5) and 500 for premium, which can change with Faz 5 pricing. Counting first keeps parallel requests within the limit. |
+| 2026-11-23 | Deepgram Nova-3 (`language=tr`, diarization on) is the speech-to-text provider (T2.1) | Seda chose it after `npm run eval:stt` compared it with OpenAI `whisper-1`, `gpt-transcribe`, and `gpt-4o-transcribe-diarize` (see `docs/STT_COMPARISON.md`). It is the only current option with both speaker labels and word timestamps, the fastest, and the cheapest ($0.0043/min). `gpt-transcribe` wrote more accurate text but has no speakers or timestamps; whisper-1 and the diarize model shut down on 2027-02-26. The result is rechecked when the remaining recordings are added. |
 
 ## Pending
 
 - Embedding provider.
-- Speech-to-text provider, based on the planned Turkish quality comparison.
 - Analytics provider.
 - F4 integration scope and provider details.
 - Faz 5 payment provider and pricing.

@@ -213,7 +213,7 @@ Her görev Bölüm 8'deki **"tamamlandı" tanımına** uymalı.
 - [x] **T1.9 E2E testi** (T1.7) — Giriş → not oluştur → görevleri gör akışı için Playwright testi.
 
 ### Faz 2 — Ses
-- [ ] **T2.1 STT servisi seçimi** — Whisper ve Deepgram'ı Türkçe örnek kayıtlarla karşılaştır (kalite, konuşmacı ayrımı, zaman damgası, maliyet). Sonucu `DECISIONS.md`'ye yaz.
+- [x] **T2.1 STT servisi seçimi** — Whisper ve Deepgram'ı Türkçe örnek kayıtlarla karşılaştır (kalite, konuşmacı ayrımı, zaman damgası, maliyet). Sonucu `DECISIONS.md`'ye yaz.
 - [ ] **T2.2 Ses yükleme ve kayıt** (T0.4) — Dosya yükleme + MediaRecorder ile kayıt, kayıt sırasında Screen Wake Lock (telefonda ekran kapanıp kayıt kesilmesin), kayıttan önce onay uyarısı, Storage'a yükleme, ilerleme göstergesi.
 - [ ] **T2.3 Transkripsiyon Edge Function'ı** (T2.1, T2.2) — Uzun kayıtları parçalara bölme, arka planda işleme, `transcripts` tablosu (segments dahil), durum takibi (işleniyor / hazır / hata), dakika kullanımını `usage`'a yazma.
 - [ ] **T2.4 F1'e bağlama** (T2.3, T1.2) — Transkript hazır olunca agent'ı otomatik çalıştır.
@@ -287,7 +287,7 @@ Her görev Bölüm 8'deki **"tamamlandı" tanımına** uymalı.
 - [x] ~~İlk sürümde hangi mod?~~ → **Çalışan modu** (2026-11-12). Öğrenci modu MVP sonrasına kalır.
 - [x] ~~UI bileşen kütüphanesi~~ → **Nuxt UI** (2026-11-12), Tailwind tabanlı.
 - [ ] LLM ve embedding sağlayıcısı
-- [ ] STT servisi (T2.1 sonucuna göre)
+- [x] ~~STT servisi~~ → **Deepgram Nova-3** (2026-11-23). Konuşmacı ayrımı ve kelime zaman damgası olan, en hızlı ve en ucuz seçenek; karşılaştırma `docs/STT_COMPARISON.md`'de.
 - [ ] Analitik aracı (PostHog mu, Google Analytics mi)
 - [ ] *(F4)* Sadece Jira Cloud mu, Jira Server / Data Center da mı? (Öneri: yalnızca Cloud.) Outlook ilk sürümde mi, sonra mı?
 - [ ] *(Faz 5)* Ödeme sağlayıcısı (iyzico mu, PayTR mi) ve fiyatlar

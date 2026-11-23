@@ -26,7 +26,8 @@
     "test:db": "supabase test db",
     "db:types": "supabase gen types typescript --local --schema public > app/types/database.types.ts",
     "functions:serve": "supabase functions serve --env-file supabase/functions/.env",
-    "eval:ai": "node evals/note-analysis/run.ts"
+    "eval:ai": "node evals/note-analysis/run.ts",
+    "eval:stt": "node evals/stt/run.ts"
   },
   "dependencies": {
     "@iconify-json/lucide": "1.2.148",
