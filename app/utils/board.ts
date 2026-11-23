@@ -27,7 +27,7 @@ export interface BoardTask {
   position: number
   source_id: string | null
   /** The note the task came from, when it still exists. */
-  sources: { title: string | null; raw_text: string | null } | null
+  sources: { title: string | null; raw_text: string | null; type: string } | null
 }
 
 export function isTaskStatus(value: unknown): value is TaskStatus {
@@ -137,3 +137,48 @@ export function toTaskForm(
 
 /** Message shown when a change could not be saved; the board shows the last saved state. */
 export const BOARD_SAVE_ERROR = 'Değişiklik kaydedilemedi; görev eski yerine döndü. Tekrar dene.'
+
+/**
+ * How close a task's due date is, for the card's colour and date badge: overdue, today, tomorrow,
+ * later, no date, or done (a finished task is never late).
+ */
+export type DueState = 'overdue' | 'today' | 'tomorrow' | 'upcoming' | 'none' | 'done'
+
+const istanbulDate = new Intl.DateTimeFormat('en-CA', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  timeZone: 'Europe/Istanbul',
+})
+
+/** Today as YYYY-MM-DD in Turkish time, so "today" does not change at midnight UTC. */
+export function todayInTurkey(now = new Date()) {
+  return istanbulDate.format(now)
+}
+
+function nextDay(date: string) {
+  const day = new Date(`${date}T00:00:00Z`)
+  day.setUTCDate(day.getUTCDate() + 1)
+  return day.toISOString().slice(0, 10)
+}
+
+export function dueState(task: Pick<BoardTask, 'due_date' | 'status'>, today: string): DueState {
+  if (task.status === 'done') return 'done'
+  if (!task.due_date) return 'none'
+  if (task.due_date < today) return 'overdue'
+  if (task.due_date === today) return 'today'
+  if (task.due_date === nextDay(today)) return 'tomorrow'
+  return 'upcoming'
+}
+
+/** Words shown before the date, so the state is not told by colour alone. */
+export const DUE_STATE_LABELS: Partial<Record<DueState, string>> = {
+  overdue: 'Gecikti',
+  today: 'Bugün',
+  tomorrow: 'Yarın',
+}
+
+/** Icon for the note type a task came from. */
+export function sourceIcon(type: string) {
+  return type === 'audio' ? 'i-lucide-mic' : type === 'pdf' ? 'i-lucide-file' : 'i-lucide-file-text'
+}
