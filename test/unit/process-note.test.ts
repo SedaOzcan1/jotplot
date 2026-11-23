@@ -227,12 +227,21 @@ describe('process-note', () => {
     )
   })
 
-  it('does not process a recording before its transcript exists, or a PDF yet', async () => {
+  it('does not process a recording or a PDF before its text exists', async () => {
     note = { id: SOURCE_ID, type: 'audio', mode: 'work', raw_text: null, transcript: null }
     expect(await errorCode(await post({ sourceId: SOURCE_ID }))).toBe('unsupported_note')
 
     note = { id: SOURCE_ID, type: 'pdf', mode: 'work', raw_text: null }
     expect(await errorCode(await post({ sourceId: SOURCE_ID }))).toBe('unsupported_note')
     expect(deps.reserveRequest).not.toHaveBeenCalled()
+  })
+
+  it('analyzes a PDF by its extracted text', async () => {
+    note = { id: SOURCE_ID, type: 'pdf', mode: 'student', raw_text: 'Ödev 3 Aralık’ta teslim.' }
+
+    expect((await post({ sourceId: SOURCE_ID })).status).toBe(200)
+    expect(deps.analyze).toHaveBeenCalledWith(
+      expect.objectContaining({ text: 'Ödev 3 Aralık’ta teslim.', mode: 'student' }),
+    )
   })
 })

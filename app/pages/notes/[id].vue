@@ -65,19 +65,28 @@ const note = computed(() => data.value?.note ?? null)
 const summary = computed(() => data.value?.summary ?? null)
 const noteTitle = computed(() => (note.value ? noteDisplayTitle(note.value) : ''))
 const transcript = computed(() => data.value?.transcript ?? null)
-/** A recording without a transcript: its transcription state is shown instead of the result. */
-const awaitingTranscript = computed(() => note.value?.type === 'audio' && !transcript.value)
+/**
+ * A recording without a transcript or a PDF without its text: how far that has got is shown
+ * instead of the result.
+ */
+const awaitingSource = computed(
+  () =>
+    (note.value?.type === 'audio' && !transcript.value) ||
+    (note.value?.type === 'pdf' && !note.value.raw_text),
+)
 /** After transcription the server extracts the tasks on its own (T2.4). */
 const analyzingInBackground = computed(
   () => note.value?.type === 'audio' && !!transcript.value && note.value.status === 'processing',
 )
 
-// While a recording is transcribed or its tasks are extracted on the server, check every few
-// seconds; the result appears without reloading.
+// While a recording is transcribed or its tasks are extracted on the server, or another tab reads
+// a PDF, check every few seconds; the result appears without reloading.
 const POLL_MS = 3000
 let pollTimer: ReturnType<typeof setInterval> | undefined
 watch(
-  () => note.value?.type === 'audio' && note.value.status === 'processing',
+  () =>
+    note.value?.status === 'processing' &&
+    (note.value.type === 'audio' || (note.value.type === 'pdf' && !note.value.raw_text)),
   (busy) => {
     clearInterval(pollTimer)
     if (busy) pollTimer = setInterval(() => void refresh(), POLL_MS)
@@ -143,7 +152,18 @@ const showFailure = computed(
         :transcript-open="!summary"
       />
 
-      <AudioNoteStatus v-if="awaitingTranscript" :note="note" @refresh="refresh()" />
+      <AudioNoteStatus
+        v-if="note.type === 'audio' && awaitingSource"
+        :note="note"
+        @refresh="refresh()"
+      />
+
+      <PdfNoteText
+        v-else-if="note.type === 'pdf' && note.storage_path"
+        :note="{ ...note, storage_path: note.storage_path }"
+        :text-open="!summary"
+        @refresh="refresh()"
+      />
 
       <details v-else-if="note.raw_text" class="rounded-xl bg-white ring-1 ring-navy-100">
         <summary class="cursor-pointer px-4 py-3 text-sm font-medium text-navy-900">
@@ -154,7 +174,7 @@ const showFailure = computed(
         </p>
       </details>
 
-      <template v-if="awaitingTranscript" />
+      <template v-if="awaitingSource" />
 
       <div
         v-else-if="(processing || analyzingInBackground) && !summary"

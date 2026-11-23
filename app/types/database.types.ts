@@ -216,6 +216,9 @@ isOneToOne: false
         isOneToOne: false
         isSetofReturn: true
       } },
+"start_pdf_extraction":
+{ Args: { "p_source_id": string }; Returns: boolean
+                           },
 "start_transcription":
 { Args: { "p_source_id": string }; Returns: boolean
                            },
