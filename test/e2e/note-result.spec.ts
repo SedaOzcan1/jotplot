@@ -91,6 +91,39 @@ test('"Görevleri çıkar" shows the result; the user edits it and adds tasks to
   await expect(page.getByRole('list', { name: 'Notlar' })).toContainText('2 görev · 1 karar')
 })
 
+test('adding a reprocessed note to the board again asks first', async ({ page }) => {
+  const user = await signInAsNewUser(page)
+  await page.route(FUNCTION_URL, fakeProcessNote(user))
+  await writeNote(page, 'Görevleri çıkar')
+
+  await page.getByRole('button', { name: 'Panoya ekle' }).click()
+  const boardTasks = page.getByRole('list', { name: 'Panodaki görevler' }).getByRole('listitem')
+  await expect(boardTasks).toHaveCount(2)
+
+  await page.getByRole('button', { name: 'Tekrar dene' }).click()
+  await page.getByRole('button', { name: 'Yeniden işle' }).click()
+  await expect(
+    page.getByRole('list', { name: 'Önerilen görevler' }).getByRole('listitem'),
+  ).toHaveCount(2)
+
+  // Cancelling adds nothing.
+  await page.getByRole('button', { name: 'Panoya ekle' }).click()
+  const warning = page.getByRole('alertdialog', { name: /panoda zaten 2 görev var/ })
+  await expect(warning).toContainText('2 görev daha eklenecek')
+  await warning.getByRole('button', { name: 'Vazgeç' }).click()
+  await expect(warning).toHaveCount(0)
+  const countTasks = async () =>
+    (await user.supabase.from('tasks').select('id', { count: 'exact', head: true })).count
+  expect(await countTasks()).toBe(2)
+
+  // Confirming adds the new tasks next to the old ones.
+  await page.getByRole('button', { name: 'Panoya ekle' }).click()
+  await warning.getByRole('button', { name: 'Yine de ekle' }).click()
+  await expect(page.getByText('2 görev panoya eklendi').first()).toBeVisible()
+  await expect(boardTasks).toHaveCount(4)
+  expect(await countTasks()).toBe(4)
+})
+
 test('a task needs a title before it can go to the board', async ({ page }) => {
   const user = await signInAsNewUser(page)
   await page.route(FUNCTION_URL, fakeProcessNote(user))
