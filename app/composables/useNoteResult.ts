@@ -9,12 +9,16 @@ export interface NoteDetail {
   mode: AppMode
   status: string
   created_at: string
+  /** The recording in the `recordings` bucket, for audio notes. */
+  storage_path: string | null
 }
 
 /** A recording's transcript (T2.3); `segments` hold speakers and times for the transcript screen. */
 export interface NoteTranscript {
   text: string
   duration_sec: number | null
+  /** Speakers and times (plain JSON; read with parseSegments). */
+  segments: unknown
 }
 
 export interface NoteTask {
@@ -68,7 +72,7 @@ export function useNoteResult() {
   async function getNote(id: string): Promise<NoteDetail | null> {
     const { data, error } = await supabase
       .from('sources')
-      .select('id, title, raw_text, type, mode, status, created_at')
+      .select('id, title, raw_text, type, mode, status, created_at, storage_path')
       .eq('id', id)
       .maybeSingle()
     if (error) throw toNoteServiceError(error)
@@ -104,11 +108,23 @@ export function useNoteResult() {
   async function getTranscript(sourceId: string): Promise<NoteTranscript | null> {
     const { data, error } = await supabase
       .from('transcripts')
-      .select('text, duration_sec')
+      .select('text, duration_sec, segments')
       .eq('source_id', sourceId)
       .maybeSingle()
     if (error) throw toNoteServiceError(error)
     return data
+  }
+
+  /**
+   * A link to play the recording, valid for an hour. Storage policies only sign files in the
+   * user's own folder.
+   */
+  async function getRecordingUrl(storagePath: string): Promise<string> {
+    const { data, error } = await supabase.storage
+      .from('recordings')
+      .createSignedUrl(storagePath, 60 * 60)
+    if (error || !data) throw new NoteServiceError('recording_unavailable')
+    return data.signedUrl
   }
 
   /**
@@ -154,6 +170,7 @@ export function useNoteResult() {
     getSummary,
     listNoteTasks,
     getTranscript,
+    getRecordingUrl,
     processNote,
     transcribeAudio,
     saveDraft,

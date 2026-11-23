@@ -4,6 +4,7 @@ import {
   fakeTranscribeAudio,
   signInThroughForm,
   signedOut,
+  silentWav,
   TRANSCRIBE_AUDIO_URL,
   type TestUser,
 } from './helpers'
@@ -19,25 +20,6 @@ test.use({
 })
 
 const STORAGE_UPLOAD = '**/storage/v1/object/recordings/**'
-
-/** A short silent WAV file: synthetic audio with no voice in it. */
-function silentWav(seconds = 1, sampleRate = 8000) {
-  const samples = seconds * sampleRate
-  const buffer = Buffer.alloc(44 + samples * 2)
-  buffer.write('RIFF', 0)
-  buffer.writeUInt32LE(36 + samples * 2, 4)
-  buffer.write('WAVEfmt ', 8)
-  buffer.writeUInt32LE(16, 16)
-  buffer.writeUInt16LE(1, 20) // PCM
-  buffer.writeUInt16LE(1, 22) // mono
-  buffer.writeUInt32LE(sampleRate, 24)
-  buffer.writeUInt32LE(sampleRate * 2, 28)
-  buffer.writeUInt16LE(2, 32)
-  buffer.writeUInt16LE(16, 34)
-  buffer.write('data', 36)
-  buffer.writeUInt32LE(samples * 2, 40)
-  return buffer
-}
 
 async function openTab(page: Page, tab: 'Kaydet' | 'Dosya yükle') {
   // The note page starts transcription on its own; these tests are only about saving the audio.

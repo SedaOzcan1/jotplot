@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Faz 2 — audio (in progress).
+Faz 2 — audio (complete). Next: Faz 3 (questions over notes and PDFs).
 
 ## Status
 
@@ -34,8 +34,12 @@ Faz 2 — audio (in progress).
 - [x] T2.2 Audio recording and upload.
 - [x] T2.3 Transcription Edge Function with Deepgram.
 - [x] T2.4 Tasks extracted from transcripts automatically.
+- [x] T2.5 Transcript with an audio player on the note page.
+- [x] Complete T2.1–T2.5 as tracked in `PROJECT.md`.
 
 ## Latest Update
+
+2026-11-23: T2.5 is done, and with it Faz 2. Audio notes show a player at the top of the note page (a signed link valid for an hour, renewed once if it expires) and a collapsible transcript with one paragraph per speaker turn. Speaker names appear when more than one speaker was found, a turn's time jumps the player to that moment, and the turn being played is highlighted. The full audio flow now works: record or upload with consent, automatic transcription with Deepgram, automatic task extraction, review, and the board. Next: Faz 3 starts with T3.1, PDF upload and text extraction.
 
 2026-11-23: T2.4 is done. Right after a recording is transcribed, the same background job extracts the summary, decisions, and tasks from the transcript with the note analysis from T1.2 (now shared in `_shared/run-analysis.ts`). It counts one AI request; at the AI limit the transcript is still ready and tasks can be extracted later with "Görevleri çıkar". If extraction fails, only extraction is retried; the recording is never transcribed or billed twice. The note page shows the transcript in a collapsible section above the usual review screen and checks the status while the server works. A local run with a synthetic 41-second recording went from upload to proposed tasks in about 12 seconds. Next: T2.5, the transcript screen with an audio player.
 
