@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import type { NoteAnalysis, NoteMode } from '../_shared/note-analysis.ts'
+import { type AnalysisSteps, type NoteStatus, runAnalysis } from '../_shared/run-analysis.ts'
 import {
   billableMinutes,
   type Transcript,
@@ -7,9 +9,10 @@ import {
 } from '../_shared/transcription.ts'
 
 /**
- * Transcribes an audio note (T2.3, US-2.2). Answers right away with 202 and keeps working in the
- * background, so a long recording does not keep the browser waiting; the note's status shows the
- * progress (processing → ready or failed). Kept free of Deno APIs so it can be tested with Vitest.
+ * Transcribes an audio note (T2.3, US-2.2) and then extracts its summary and tasks from the
+ * transcript (T2.4). Answers right away with 202 and keeps working in the background, so a long
+ * recording does not keep the browser waiting; the note's status shows the progress
+ * (processing → ready or failed). Kept free of Deno APIs so it can be tested with Vitest.
  */
 
 export const CORS_HEADERS = {
@@ -59,8 +62,11 @@ export function errorResponse(code: ErrorCode): Response {
 export interface AudioNote {
   id: string
   type: string
+  mode: NoteMode
   status: string
   storage_path: string | null
+  /** True once the recording has a transcript; it is never transcribed (and billed) again. */
+  transcribed: boolean
 }
 
 /** Data access with the signed-in user's permissions. */
@@ -71,7 +77,7 @@ export interface UserScope {
   startTranscription(sourceId: string): Promise<boolean>
 }
 
-export interface TranscribeAudioDeps {
+export interface TranscribeAudioDeps extends Omit<AnalysisSteps, 'setStatus' | 'saveSummary'> {
   /** Returns null when the access token is missing or invalid. */
   userScope(authorization: string | null): Promise<UserScope | null>
   /** Minutes left this month. Service role. */
@@ -81,28 +87,30 @@ export interface TranscribeAudioDeps {
   transcribe(audio: Blob): Promise<Transcript>
   /** Creates or replaces the note's transcript. Service role; users cannot write transcripts. */
   saveTranscript(userId: string, sourceId: string, transcript: Transcript): Promise<void>
-  /** Adds minutes and cost to the user's usage. Service role. */
-  recordUsage(userId: string, minutes: number, costUsd: number): Promise<void>
+  /** Adds recording minutes and their cost to the user's usage. Service role. */
+  recordMinutes(userId: string, minutes: number, costUsd: number): Promise<void>
   /** Service role, so the background work does not depend on the user's token staying valid. */
-  setStatus(sourceId: string, status: 'ready' | 'failed'): Promise<void>
+  setStatus(sourceId: string, status: NoteStatus): Promise<void>
+  /** Creates or replaces the note's summary; returns its id. Service role. */
+  saveSummary(userId: string, sourceId: string, analysis: NoteAnalysis): Promise<string>
   /** Keeps the work running after the response is sent (EdgeRuntime.waitUntil). */
   runInBackground(work: Promise<void>): void
-  log?: (message: string, details?: Record<string, unknown>) => void
 }
 
-/** The background part: download, transcribe, save, and count the minutes. */
+/** The background part: download, transcribe, save, count the minutes, then extract tasks. */
 export async function transcribeNote(
   deps: TranscribeAudioDeps,
   userId: string,
   note: AudioNote & { storage_path: string },
 ): Promise<void> {
   const log = deps.log ?? (() => {})
+  let transcribed = false
   try {
     const audio = await deps.downloadAudio(note.storage_path)
     const transcript = await deps.transcribe(audio)
     await deps.saveTranscript(userId, note.id, transcript)
     try {
-      await deps.recordUsage(
+      await deps.recordMinutes(
         userId,
         billableMinutes(transcript.durationSec),
         transcriptionCostUsd(transcript.durationSec),
@@ -111,8 +119,27 @@ export async function transcribeNote(
       // The user still gets the transcript; the missing usage is logged for follow-up.
       log('Recording speech-to-text usage failed', { sourceId: note.id, error: String(error) })
     }
-    await deps.setStatus(note.id, 'ready')
+    transcribed = true
+
+    // Tasks come from the transcript right away, as for a text note (T2.4).
+    const outcome = await runAnalysis(
+      {
+        ...deps,
+        saveSummary: (sourceId, analysis) => deps.saveSummary(userId, sourceId, analysis),
+      },
+      { userId, sourceId: note.id, text: transcript.text, mode: note.mode },
+    )
+    if (!outcome.ok) {
+      log('Extracting tasks from a transcript failed', { sourceId: note.id, code: outcome.code })
+      // At the AI limit the transcript is still ready; tasks can be extracted next month.
+      await deps.setStatus(note.id, outcome.code === 'limit_reached' ? 'ready' : 'failed')
+    }
   } catch (error) {
+    if (transcribed) {
+      log('Finishing a transcribed recording failed', { sourceId: note.id, error: String(error) })
+      await deps.setStatus(note.id, 'failed').catch(() => {})
+      return
+    }
     log('Transcribing a recording failed', {
       sourceId: note.id,
       code: error instanceof TranscriptionError ? error.code : 'internal',
@@ -142,7 +169,10 @@ export function createHandler(deps: TranscribeAudioDeps) {
       const note = await scope.loadNote(sourceId)
       if (!note) return errorResponse('note_not_found')
       if (note.type !== 'audio' || !note.storage_path) return errorResponse('unsupported_note')
-      if (note.status === 'ready') return json({ sourceId, status: 'ready' })
+      // Already transcribed: a retry of the task extraction goes through process-note instead.
+      if (note.transcribed || note.status === 'ready') {
+        return json({ sourceId, status: note.status })
+      }
 
       if ((await deps.minutesRemaining(scope.userId)) <= 0) return errorResponse('limit_reached')
       // Only one request may transcribe a note; the others report that it is already running.

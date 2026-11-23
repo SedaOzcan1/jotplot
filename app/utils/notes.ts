@@ -69,7 +69,7 @@ export interface NoteListItem {
 
 const AUDIO_STATUS_LINES: Record<string, string> = {
   pending: 'Yazıya dökülmeyi bekliyor',
-  processing: 'Yazıya dökülüyor…',
+  processing: 'İşleniyor…',
   failed: 'Yazıya dökülemedi',
   ready: 'Transkript hazır',
 }

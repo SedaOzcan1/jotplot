@@ -107,7 +107,17 @@ export function serviceClient(): SupabaseClient {
 export const TRANSCRIBE_AUDIO_URL = '**/functions/v1/transcribe-audio'
 
 export type FakeTranscription =
-  | { outcome: 'ready'; text: string; durationSec?: number }
+  | {
+      outcome: 'ready'
+      text: string
+      durationSec?: number
+      /** The summary and tasks the real function extracts right after transcribing (T2.4). */
+      analysis?: {
+        summary: string
+        decisions: string[]
+        tasks: { title: string; assignee: string | null }[]
+      }
+    }
   | { outcome: 'failed' }
   | { outcome: 'limit' }
   /** Accepts the request and does nothing, for tests that are not about transcription. */
@@ -179,6 +189,24 @@ export function fakeTranscribeAudio(result: FakeTranscription | (() => FakeTrans
       p_minutes: (outcome.durationSec ?? 42) / 60,
       p_cost_usd: 0,
     })
+    if (outcome.analysis) {
+      await db.from('summaries').upsert(
+        {
+          user_id: note!.user_id,
+          source_id: sourceId,
+          summary: outcome.analysis.summary,
+          decisions: outcome.analysis.decisions,
+          concepts: [],
+          questions: [],
+          proposed_tasks: outcome.analysis.tasks.map((task) => ({
+            ...task,
+            type: 'task',
+            due_date: null,
+          })),
+        },
+        { onConflict: 'source_id' },
+      )
+    }
     await db.from('sources').update({ status: 'ready' }).eq('id', sourceId)
   }
 }

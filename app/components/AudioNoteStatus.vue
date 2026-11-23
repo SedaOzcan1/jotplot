@@ -1,18 +1,13 @@
 <script setup lang="ts">
-import { ProcessNoteError, type NoteTranscript } from '~/composables/useNoteResult'
+import { ProcessNoteError } from '~/composables/useNoteResult'
 
 /**
- * Transcription state of an audio note (T2.3, US-2.2). A recording that was never transcribed
- * starts on its own; while it is processing, the note is checked again every few seconds.
+ * Transcription state of an audio note that has no transcript yet (T2.3, US-2.2). A recording
+ * that was never transcribed starts on its own. The page checks the status while it is processing
+ * and shows the transcript and tasks once they exist.
  */
-const props = defineProps<{
-  note: { id: string; status: string }
-  transcript: NoteTranscript | null
-}>()
+const props = defineProps<{ note: { id: string; status: string } }>()
 const emit = defineEmits<{ refresh: [] }>()
-
-/** How often the note is checked while it is being transcribed. */
-const POLL_MS = 3000
 
 const { transcribeAudio } = useNoteResult()
 const ready = useIsMounted()
@@ -43,24 +38,13 @@ async function start() {
 }
 
 onMounted(() => {
-  if (props.note.status === 'pending' && !props.transcript && !autoStarted) {
+  if (props.note.status === 'pending' && !autoStarted) {
     autoStarted = true
     void start()
   }
 })
 
 const processing = computed(() => starting.value || props.note.status === 'processing')
-
-let timer: ReturnType<typeof setInterval> | undefined
-watch(
-  () => props.note.status === 'processing',
-  (isProcessing) => {
-    clearInterval(timer)
-    if (isProcessing) timer = setInterval(() => emit('refresh'), POLL_MS)
-  },
-  { immediate: true },
-)
-onBeforeUnmount(() => clearInterval(timer))
 </script>
 
 <template>
@@ -113,20 +97,6 @@ onBeforeUnmount(() => clearInterval(timer))
       Tekrar dene
     </UButton>
   </template>
-
-  <section
-    v-else-if="transcript"
-    class="space-y-2 rounded-xl bg-white p-4 ring-1 ring-navy-100"
-    aria-labelledby="transcript-title"
-  >
-    <h3 id="transcript-title" class="font-semibold text-navy-900">
-      Transkript
-      <span v-if="transcript.duration_sec" class="text-sm font-normal text-slate-500">
-        · {{ formatDuration(transcript.duration_sec) }}
-      </span>
-    </h3>
-    <p class="text-sm whitespace-pre-wrap break-words text-slate-700">{{ transcript.text }}</p>
-  </section>
 
   <div
     v-else

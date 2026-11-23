@@ -98,7 +98,7 @@ describe('noteStatusLine', () => {
     const audio = (status: string) =>
       noteStatusLine({ type: 'audio', status, summaries: [], tasks: [{ count: 0 }] })
     expect(audio('pending')).toBe('Yazıya dökülmeyi bekliyor')
-    expect(audio('processing')).toBe('Yazıya dökülüyor…')
+    expect(audio('processing')).toBe('İşleniyor…')
     expect(audio('failed')).toBe('Yazıya dökülemedi')
     expect(audio('ready')).toBe('Transkript hazır')
   })

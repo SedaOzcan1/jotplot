@@ -53,6 +53,7 @@ Confirmed decisions are recorded here with their date and rationale. Pending que
 | 2026-11-23 | Monthly speech-to-text limits: 30 minutes on the free plan and 300 on premium. A recording is accepted while minutes remain, and its real length is counted after transcription, so one recording may go past the limit | Seda chose 30/300 to keep the cost risk lowest (at most about $0.13 per free user a month with Deepgram). The length is only known once Deepgram has processed the file. |
 | 2026-11-23 | Transcription starts on its own as soon as a recording is saved; the transcribe-audio function answers at once and works in the background, and the note page checks the status every few seconds | Seda chose automatic start, matching US-2.2. Background work keeps long recordings from holding the browser. |
 | 2026-11-23 | Recordings are sent to Deepgram in one piece, without splitting | Seda chose not to split: splitting compressed audio needs decoding that the Edge Function cannot do and that is memory-heavy on phones, Deepgram accepts files far larger than the 25 MB limit, and speaker numbers stay consistent across the whole recording. Splitting was planned for Whisper's 25 MB API limit. |
+| 2026-11-23 | Extracting tasks from a transcript right after transcription counts one AI request, like "Görevleri çıkar" on a text note; at the AI limit the transcript is still saved and tasks can be extracted later | Seda confirmed: recordings and text notes share the same monthly AI limit, and running out of AI requests never loses a transcript. |
 
 ## Pending
 

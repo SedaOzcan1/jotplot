@@ -64,6 +64,28 @@ watch(
 const note = computed(() => data.value?.note ?? null)
 const summary = computed(() => data.value?.summary ?? null)
 const noteTitle = computed(() => (note.value ? noteDisplayTitle(note.value) : ''))
+const transcript = computed(() => data.value?.transcript ?? null)
+/** A recording without a transcript: its transcription state is shown instead of the result. */
+const awaitingTranscript = computed(() => note.value?.type === 'audio' && !transcript.value)
+/** After transcription the server extracts the tasks on its own (T2.4). */
+const analyzingInBackground = computed(
+  () => note.value?.type === 'audio' && !!transcript.value && note.value.status === 'processing',
+)
+
+// While a recording is transcribed or its tasks are extracted on the server, check every few
+// seconds; the result appears without reloading.
+const POLL_MS = 3000
+let pollTimer: ReturnType<typeof setInterval> | undefined
+watch(
+  () => note.value?.type === 'audio' && note.value.status === 'processing',
+  (busy) => {
+    clearInterval(pollTimer)
+    if (busy) pollTimer = setInterval(() => void refresh(), POLL_MS)
+  },
+  { immediate: true },
+)
+onBeforeUnmount(() => clearInterval(pollTimer))
+
 const showFailure = computed(
   () =>
     !processing.value &&
@@ -114,12 +136,23 @@ const showFailure = computed(
         </p>
       </header>
 
-      <AudioNoteStatus
-        v-if="note.type === 'audio'"
-        :note="note"
-        :transcript="data?.transcript ?? null"
-        @refresh="refresh()"
-      />
+      <AudioNoteStatus v-if="awaitingTranscript" :note="note" @refresh="refresh()" />
+
+      <details
+        v-else-if="transcript"
+        :open="!summary"
+        class="rounded-xl bg-white ring-1 ring-navy-100"
+      >
+        <summary class="cursor-pointer px-4 py-3 text-sm font-medium text-navy-900">
+          Transkript
+          <span v-if="transcript.duration_sec" class="font-normal text-slate-500">
+            · {{ formatDuration(transcript.duration_sec) }}
+          </span>
+        </summary>
+        <p class="px-4 pb-4 text-sm whitespace-pre-wrap break-words text-slate-700">
+          {{ transcript.text }}
+        </p>
+      </details>
 
       <details v-else-if="note.raw_text" class="rounded-xl bg-white ring-1 ring-navy-100">
         <summary class="cursor-pointer px-4 py-3 text-sm font-medium text-navy-900">
@@ -130,15 +163,17 @@ const showFailure = computed(
         </p>
       </details>
 
-      <template v-if="note.type === 'audio'" />
+      <template v-if="awaitingTranscript" />
 
       <div
-        v-else-if="processing && !summary"
+        v-else-if="(processing || analyzingInBackground) && !summary"
         role="status"
         class="flex flex-col items-center gap-3 rounded-xl bg-white px-4 py-10 text-center ring-1 ring-navy-100"
       >
         <UIcon name="i-lucide-loader-circle" class="size-8 animate-spin text-navy-500" />
-        <p class="font-semibold text-navy-900">Notun işleniyor…</p>
+        <p class="font-semibold text-navy-900">
+          {{ note.type === 'audio' ? 'Görevler çıkarılıyor…' : 'Notun işleniyor…' }}
+        </p>
         <p class="text-sm text-slate-500">
           Özet, kararlar ve görevler çıkarılıyor. Bu genelde birkaç saniye sürer.
         </p>

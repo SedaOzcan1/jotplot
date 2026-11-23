@@ -33,11 +33,15 @@ async function userScope(authorization: string | null): Promise<UserScope | null
     async loadNote(sourceId) {
       const { data: note, error } = await client
         .from('sources')
-        .select('id, type, mode, raw_text')
+        .select('id, type, mode, raw_text, transcripts(text)')
         .eq('id', sourceId)
         .maybeSingle()
       if (error) throw error
-      return note as Note | null
+      if (!note) return null
+      // A recording is analyzed by its transcript (T2.4); the embed is a list or a single row.
+      const transcripts = note.transcripts as { text: string }[] | { text: string } | null
+      const transcript = Array.isArray(transcripts) ? transcripts[0] : transcripts
+      return { ...note, transcript: transcript?.text ?? null } as Note
     },
     async setStatus(sourceId, status) {
       const { error } = await client.from('sources').update({ status }).eq('id', sourceId)
