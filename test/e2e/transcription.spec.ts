@@ -7,6 +7,7 @@ import {
   signInThroughForm,
   signedOut,
   PROCESS_NOTE_URL,
+  silentWav,
   TRANSCRIBE_AUDIO_URL,
   type TestUser,
 } from './helpers'
@@ -19,13 +20,13 @@ const TRANSCRIPT =
   'Ece mağaza görsellerini cuma gününe kadar hazırlayacak.\nTamam, ben de bülteni yazarım.'
 
 /** Uploads a tiny synthetic file and saves it as an audio note, the way the app does. */
-async function createRecording(user: TestUser, title: string) {
+async function createRecording(user: TestUser, title: string, audio = new Uint8Array(64)) {
   const { data: auth } = await user.supabase.auth.getUser()
   const id = crypto.randomUUID()
   const path = `${auth.user!.id}/${id}.wav`
   const upload = await user.supabase.storage
     .from('recordings')
-    .upload(path, new Uint8Array(64), { contentType: 'audio/wav' })
+    .upload(path, audio, { contentType: 'audio/wav' })
   if (upload.error) throw upload.error
   const note = await user.supabase.from('sources').insert({
     id,
@@ -38,9 +39,13 @@ async function createRecording(user: TestUser, title: string) {
   return id
 }
 
-async function openRecording(page: Page, result: FakeTranscription | (() => FakeTranscription)) {
+async function openRecording(
+  page: Page,
+  result: FakeTranscription | (() => FakeTranscription),
+  audio?: Uint8Array,
+) {
   const user = await createTestUser('stt')
-  const id = await createRecording(user, 'Lansman toplantısı kaydı')
+  const id = await createRecording(user, 'Lansman toplantısı kaydı', audio)
   let calls = 0
   await page.route(TRANSCRIBE_AUDIO_URL, async (route) => {
     if (route.request().method() === 'POST') calls++
@@ -132,4 +137,40 @@ test('at the monthly minute limit the recording waits and links to usage', async
   ).toBeVisible()
   await page.getByRole('link', { name: 'Kullanımı gör' }).click()
   await expect(page).toHaveURL(/\/settings$/)
+})
+
+test('the recording plays, and a turn’s time jumps to that moment', async ({ page }) => {
+  await openRecording(
+    page,
+    {
+      outcome: 'ready',
+      text: TRANSCRIPT,
+      durationSec: 8,
+      segments: [
+        { start: 0, end: 1.5, speaker: 0, text: 'Günaydın Kaan,' },
+        { start: 1.6, end: 2.8, speaker: 0, text: 'rapora bakabildin mi?' },
+        { start: 3, end: 5.5, speaker: 1, text: 'Baktım, iade oranı artmış.' },
+        { start: 6, end: 7.5, speaker: 0, text: 'Peki, pazartesi konuşalım.' },
+      ],
+    },
+    silentWav(8),
+  )
+
+  const turns = page.getByRole('list', { name: 'Transkript' }).getByRole('listitem')
+  await expect(turns).toHaveCount(3, { timeout: 10_000 })
+  await expect(turns.nth(0)).toContainText('Konuşmacı 1')
+  await expect(turns.nth(0)).toContainText('Günaydın Kaan, rapora bakabildin mi?')
+  await expect(turns.nth(1)).toContainText('Konuşmacı 2')
+
+  const player = page.getByLabel('Kaydı dinle')
+  await expect(player).toBeVisible()
+  await expect
+    .poll(() => player.evaluate((audio: HTMLAudioElement) => audio.duration))
+    .toBeGreaterThan(7)
+
+  await page.getByRole('button', { name: '0:03 anından dinle' }).click()
+  await expect
+    .poll(() => player.evaluate((audio: HTMLAudioElement) => audio.currentTime))
+    .toBeGreaterThanOrEqual(3)
+  await expect(turns.nth(1)).toHaveAttribute('aria-current', 'true')
 })

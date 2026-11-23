@@ -136,23 +136,14 @@ const showFailure = computed(
         </p>
       </header>
 
-      <AudioNoteStatus v-if="awaitingTranscript" :note="note" @refresh="refresh()" />
+      <NoteRecording
+        v-if="note.type === 'audio' && note.storage_path"
+        :storage-path="note.storage_path"
+        :transcript="transcript"
+        :transcript-open="!summary"
+      />
 
-      <details
-        v-else-if="transcript"
-        :open="!summary"
-        class="rounded-xl bg-white ring-1 ring-navy-100"
-      >
-        <summary class="cursor-pointer px-4 py-3 text-sm font-medium text-navy-900">
-          Transkript
-          <span v-if="transcript.duration_sec" class="font-normal text-slate-500">
-            · {{ formatDuration(transcript.duration_sec) }}
-          </span>
-        </summary>
-        <p class="px-4 pb-4 text-sm whitespace-pre-wrap break-words text-slate-700">
-          {{ transcript.text }}
-        </p>
-      </details>
+      <AudioNoteStatus v-if="awaitingTranscript" :note="note" @refresh="refresh()" />
 
       <details v-else-if="note.raw_text" class="rounded-xl bg-white ring-1 ring-navy-100">
         <summary class="cursor-pointer px-4 py-3 text-sm font-medium text-navy-900">

@@ -54,6 +54,7 @@ Confirmed decisions are recorded here with their date and rationale. Pending que
 | 2026-11-23 | Transcription starts on its own as soon as a recording is saved; the transcribe-audio function answers at once and works in the background, and the note page checks the status every few seconds | Seda chose automatic start, matching US-2.2. Background work keeps long recordings from holding the browser. |
 | 2026-11-23 | Recordings are sent to Deepgram in one piece, without splitting | Seda chose not to split: splitting compressed audio needs decoding that the Edge Function cannot do and that is memory-heavy on phones, Deepgram accepts files far larger than the 25 MB limit, and speaker numbers stay consistent across the whole recording. Splitting was planned for Whisper's 25 MB API limit. |
 | 2026-11-23 | Extracting tasks from a transcript right after transcription counts one AI request, like "Görevleri çıkar" on a text note; at the AI limit the transcript is still saved and tasks can be extracted later | Seda confirmed: recordings and text notes share the same monthly AI limit, and running out of AI requests never loses a transcript. |
+| 2026-11-23 | The recording and its transcript are shown on the note page: a player at the top, then a collapsible transcript with one paragraph per speaker turn ("Konuşmacı 1", "Konuşmacı 2" when more than one speaker is found); a turn's time jumps the player to that moment | Seda chose a section on the note page over a separate transcript page, so the recording, transcript, and tasks stay together. |
 
 ## Pending
 
