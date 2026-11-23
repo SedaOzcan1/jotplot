@@ -74,6 +74,13 @@ const AUDIO_STATUS_LINES: Record<string, string> = {
   ready: 'Transkript hazır',
 }
 
+const PDF_STATUS_LINES: Record<string, string> = {
+  pending: 'Okunmayı bekliyor',
+  processing: 'İşleniyor…',
+  failed: 'İşlenemedi',
+  ready: 'Metin hazır',
+}
+
 /** Short status line for a note card: "3 görev · 2 karar", "İşleniyor…", and so on. */
 export function noteStatusLine(
   note: Pick<NoteListItem, 'status' | 'summaries' | 'tasks'> & { type?: string },
@@ -81,6 +88,9 @@ export function noteStatusLine(
   const summary = note.summaries?.[0]
   if (!summary && note.type === 'audio') {
     return AUDIO_STATUS_LINES[note.status] ?? AUDIO_STATUS_LINES.pending!
+  }
+  if (!summary && note.type === 'pdf') {
+    return PDF_STATUS_LINES[note.status] ?? PDF_STATUS_LINES.pending!
   }
   if (!summary) {
     return note.status === 'processing'

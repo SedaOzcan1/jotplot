@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import type { AudioNoteDraft } from '~/composables/useAudioNotes'
+import type { UploadDraft, UploadKind } from '~/composables/useNoteUploads'
 
-/** Records in the browser or uploads a file, then saves it as an audio note (T2.2, US-2.1). */
+/**
+ * Records in the browser (T2.2, US-2.1) or uploads a recording or a PDF (T3.1), then saves it as
+ * a note. Recordings need a consent confirmation first; PDFs do not.
+ */
 const props = defineProps<{ source: 'record' | 'upload' }>()
 
-const { createAudioNote } = useAudioNotes()
+const { createNoteFromFile } = useNoteUploads()
 const { getAiUsage } = useAiUsage()
 // Shown before recording; the server still enforces the limit.
 const { data: usage } = useAsyncData('ai-usage', () => getAiUsage(), { server: false })
@@ -26,14 +29,21 @@ watch(consent, (value) => {
 const picked = shallowRef<File | null>(null)
 const fileError = ref<string | null>(null)
 
-/** The audio that will be saved: the finished recording or the picked file. */
+/** The file that will be saved: the finished recording or the picked file. */
 const audio = computed<Blob | null>(() =>
   props.source === 'record' ? (recorder.recording.value as Blob | null) : picked.value,
+)
+/** A recording or a PDF; only recordings need consent and get a player. */
+const kind = computed<UploadKind>(() =>
+  props.source === 'upload' && picked.value && isPdfFile(picked.value) ? 'pdf' : 'audio',
+)
+const needsConsent = computed(
+  () => props.source === 'record' || (!!picked.value && kind.value === 'audio'),
 )
 const uploading = ref(false)
 const progress = ref(0)
 const uploadError = ref<string | null>(null)
-let draft: AudioNoteDraft | null = null
+let draft: UploadDraft | null = null
 let abort: AbortController | null = null
 /** True once the note is saved, so leaving the page no longer warns. */
 let saved = false
@@ -56,7 +66,11 @@ function onFileChange(event: Event) {
   const file = input.files?.[0] ?? null
   input.value = ''
   if (!file) return
-  fileError.value = audioFileError(file)
+  fileError.value = isPdfFile(file)
+    ? pdfFileError(file)
+    : audioExtension(file)
+      ? audioFileError(file)
+      : 'Bu dosya türü desteklenmiyor. Bir ses dosyası (MP3, M4A, WAV, WEBM, OGG, AAC, FLAC) ya da PDF seç.'
   picked.value = fileError.value ? null : file
   uploadError.value = null
 }
@@ -69,38 +83,47 @@ function discard() {
 
 async function save() {
   const blob = audio.value
-  if (!blob || uploading.value || !consentAt.value) return
-  const extension = audioExtension({ type: blob.type, name: picked.value?.name })
+  if (!blob || uploading.value || (needsConsent.value && !consentAt.value)) return
+  const extension =
+    kind.value === 'pdf' ? 'pdf' : audioExtension({ type: blob.type, name: picked.value?.name })
   if (!extension) {
     uploadError.value = 'Bu kayıt türü desteklenmiyor.'
     return
   }
+  // A PDF without a title is named after its file.
+  const noteTitle =
+    title.value.trim() || (kind.value === 'pdf' ? titleFromFileName(picked.value!.name) : '')
   // A retry reuses the draft, so a file that already reached Storage is not sent again.
-  draft ??= createAudioNoteDraft(blob, {
+  draft ??= createUploadDraft(blob, {
+    kind: kind.value,
     extension,
-    title: title.value,
+    title: noteTitle,
     mode: mode.value,
-    consentConfirmedAt: consentAt.value,
+    consentConfirmedAt: kind.value === 'audio' ? consentAt.value : null,
   })
-  draft.title = title.value
+  draft.title = noteTitle
   uploading.value = true
   uploadError.value = null
   progress.value = 0
   abort = new AbortController()
   try {
-    const id = await createAudioNote(draft, (value) => (progress.value = value), abort.signal)
+    const id = await createNoteFromFile(draft, (value) => (progress.value = value), abort.signal)
     saved = true
-    toast.add({ title: 'Kayıt yüklendi', color: 'success', icon: 'i-lucide-check' })
+    toast.add({
+      title: kind.value === 'pdf' ? 'PDF yüklendi' : 'Kayıt yüklendi',
+      color: 'success',
+      icon: 'i-lucide-check',
+    })
     await navigateTo(`/notes/${id}`)
   } catch (error) {
-    uploadError.value = audioUploadErrorMessage(error)
+    uploadError.value = uploadErrorMessage(error, kind.value)
   } finally {
     uploading.value = false
     abort = null
   }
 }
 
-const LEAVE_WARNING = 'Kaydın henüz kaydedilmedi. Sayfadan çıkarsan kayıt silinecek.'
+const LEAVE_WARNING = 'Dosyan henüz kaydedilmedi. Sayfadan çıkarsan silinecek.'
 
 function onBeforeUnload(event: BeforeUnloadEvent) {
   if (!hasUnsaved.value || saved) return
@@ -136,10 +159,18 @@ const consentLabel =
 
     <ModeSwitch label="Notun modu" />
 
-    <UFormField label="Kaydın başlığı (isteğe bağlı)">
+    <UFormField
+      :label="
+        source === 'record' ? 'Kaydın başlığı (isteğe bağlı)' : 'Dosyanın başlığı (isteğe bağlı)'
+      "
+    >
       <UInput
         v-model="title"
-        placeholder="Örn. Ürün ekibi haftalık toplantısı"
+        :placeholder="
+          source === 'record'
+            ? 'Örn. Ürün ekibi haftalık toplantısı'
+            : 'Örn. Veri Yapıları ders notları'
+        "
         :maxlength="NOTE_TITLE_MAX_LENGTH"
         size="lg"
         class="w-full"
@@ -147,6 +178,7 @@ const consentLabel =
     </UFormField>
 
     <section
+      v-if="needsConsent"
       class="space-y-3 rounded-xl bg-white p-4 ring-1 ring-navy-100"
       aria-labelledby="consent-title"
     >
@@ -283,31 +315,34 @@ const consentLabel =
       <div
         class="flex flex-col items-center gap-3 rounded-xl bg-white px-4 py-8 text-center ring-1 ring-navy-100"
       >
-        <UIcon name="i-lucide-file-audio" class="size-8 text-navy-500" aria-hidden="true" />
-        <p class="text-sm text-slate-600">
-          MP3, M4A, WAV, WEBM, OGG, AAC veya FLAC; en fazla {{ formatFileSize(AUDIO_MAX_BYTES) }}.
+        <UIcon name="i-lucide-file-up" class="size-8 text-navy-500" aria-hidden="true" />
+        <p class="max-w-md text-sm text-slate-600">
+          Ses kaydı (MP3, M4A, WAV, WEBM, OGG, AAC, FLAC; en fazla
+          {{ formatFileSize(AUDIO_MAX_BYTES) }}) ya da PDF (en fazla
+          {{ formatFileSize(PDF_MAX_BYTES) }} ve {{ PDF_MAX_PAGES }} sayfa).
         </p>
         <label
           class="inline-flex cursor-pointer items-center gap-2 rounded-md bg-brand-gradient px-4 py-2.5 text-base font-medium text-white has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-75 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-navy-500"
         >
           <UIcon name="i-lucide-upload" class="size-5" aria-hidden="true" />
-          Ses dosyası seç
+          Dosya seç
           <input
             type="file"
             class="sr-only"
-            :accept="AUDIO_ACCEPT"
-            :disabled="!ready || !consent"
+            :accept="`${AUDIO_ACCEPT},${PDF_ACCEPT}`"
+            :disabled="!ready"
             @change="onFileChange"
           />
         </label>
-        <p v-if="!consent" class="text-xs text-slate-500">
-          Dosya seçmek için önce onay kutusunu işaretle.
-        </p>
       </div>
     </section>
 
     <!-- Ready to save ---------------------------------------------------------------------------- -->
-    <section v-if="audio" class="space-y-3" aria-label="Kaydedilecek ses">
+    <section
+      v-if="audio"
+      class="space-y-3"
+      :aria-label="kind === 'pdf' ? 'Kaydedilecek dosya' : 'Kaydedilecek ses'"
+    >
       <UAlert
         v-if="recorder.notice.value && source === 'record'"
         color="warning"
@@ -320,9 +355,22 @@ const consentLabel =
           <template v-if="source === 'record'">
             Kayıt · {{ formatDuration(recorder.elapsedSeconds.value) }} · {{ sizeLabel }}
           </template>
-          <template v-else>{{ picked?.name }} · {{ sizeLabel }}</template>
+          <template v-else>
+            <UIcon
+              v-if="kind === 'pdf'"
+              name="i-lucide-file-text"
+              class="me-1 size-4 align-text-bottom text-navy-500"
+              aria-hidden="true"
+            />{{ picked?.name }} · {{ sizeLabel }}
+          </template>
         </p>
-        <audio v-if="previewUrl" :src="previewUrl" controls class="w-full" aria-label="Önizleme" />
+        <audio
+          v-if="previewUrl && kind === 'audio'"
+          :src="previewUrl"
+          controls
+          class="w-full"
+          aria-label="Önizleme"
+        />
       </div>
 
       <div v-if="uploading" class="space-y-2" role="status">
@@ -360,12 +408,15 @@ const consentLabel =
           class="bg-brand-gradient"
           :icon="uploadError ? 'i-lucide-rotate-cw' : 'i-lucide-cloud-upload'"
           :loading="uploading"
-          :disabled="!ready || uploading || !consent"
+          :disabled="!ready || uploading || (needsConsent && !consent)"
           @click="save"
         >
-          {{ uploadError ? 'Tekrar dene' : 'Kaydı yükle' }}
+          {{ uploadError ? 'Tekrar dene' : kind === 'pdf' ? 'PDF’i yükle' : 'Kaydı yükle' }}
         </UButton>
       </div>
+      <p v-if="needsConsent && !consent" class="text-center text-xs text-slate-500">
+        Yüklemek için yukarıdaki onay kutusunu işaretle.
+      </p>
       <a
         v-if="uploadError && previewUrl && source === 'record'"
         :href="previewUrl"

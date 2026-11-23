@@ -230,3 +230,44 @@ export function silentWav(seconds = 1, sampleRate = 8000) {
   buffer.writeUInt32LE(samples * 2, 40)
   return buffer
 }
+
+export const EXTRACT_PDF_URL = '**/functions/v1/extract-pdf'
+
+/**
+ * Stands in for the extract-pdf Edge Function so tests do not need the function server: saves a
+ * fixed text for the PDF as the signed-in test user, or answers with the error the real function
+ * gives for a PDF without text.
+ */
+export function fakeExtractPdf(user: TestUser, result: { text: string } | { error: 'no_text' }) {
+  return async (route: Route) => {
+    if (route.request().method() === 'OPTIONS') {
+      return route.fulfill({
+        status: 200,
+        headers: { ...CORS_HEADERS, 'Access-Control-Allow-Headers': '*' },
+      })
+    }
+    const { sourceId } = route.request().postDataJSON() as { sourceId: string }
+    if ('error' in result) {
+      await user.supabase.from('sources').update({ status: 'failed' }).eq('id', sourceId)
+      return route.fulfill({
+        status: 422,
+        headers: CORS_HEADERS,
+        json: {
+          error: {
+            code: 'no_text',
+            message:
+              'Bu PDF’te seçilebilir metin bulunamadı. Taranmış ya da fotoğraftan oluşan bir PDF olabilir.',
+          },
+        },
+      })
+    }
+    await user.supabase
+      .from('sources')
+      .update({ raw_text: result.text, status: 'ready' })
+      .eq('id', sourceId)
+    await route.fulfill({
+      json: { sourceId, status: 'ready', pageCount: 1 },
+      headers: CORS_HEADERS,
+    })
+  }
+}

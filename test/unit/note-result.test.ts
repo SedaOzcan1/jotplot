@@ -103,6 +103,14 @@ describe('noteStatusLine', () => {
     expect(audio('ready')).toBe('Transkript hazır')
   })
 
+  it('describes where a PDF is', () => {
+    const pdf = (status: string) =>
+      noteStatusLine({ type: 'pdf', status, summaries: [], tasks: [{ count: 0 }] })
+    expect(pdf('pending')).toBe('Okunmayı bekliyor')
+    expect(pdf('ready')).toBe('Metin hazır')
+    expect(pdf('failed')).toBe('İşlenemedi')
+  })
+
   it('counts proposed and approved tasks and the decisions', () => {
     expect(
       noteStatusLine({

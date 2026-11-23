@@ -1,6 +1,6 @@
 # Jotplot — Elle Test Rehberi
 
-Bu rehber, Faz 1 ve Faz 2 özelliklerini uygulamada elle denemek içindir. Örnek notları kopyalayıp yapıştırabilirsin. Notlar ve kişiler uydurmadır; aynı notlar otomatik AI kalite testinde (`npm run eval:ai`, aşağıda) de kullanılır, bu yüzden metinleri değiştirirsen `evals/note-analysis/cases.ts` dosyasını da güncelle.
+Bu rehber, Faz 1, Faz 2 ve Faz 3 özelliklerini uygulamada elle denemek içindir. Örnek notları kopyalayıp yapıştırabilirsin. Notlar ve kişiler uydurmadır; aynı notlar otomatik AI kalite testinde (`npm run eval:ai`, aşağıda) de kullanılır, bu yüzden metinleri değiştirirsen `evals/note-analysis/cases.ts` dosyasını da güncelle.
 
 > "Görevleri çıkar" her basışta gerçek AI'ı çağırır: bir kullanım hakkı (ayda 50) ve yaklaşık $0,0006 harcar. Bu rehberin tamamı 15–20 istek kullanır.
 
@@ -235,14 +235,14 @@ Bütçe yirmi bin liradan yirmi beş bin liraya çıkarıldı.
 
 İki kişiyle (ya da sesini değiştirerek iki rol yaparak) telefonun ses kaydedicisiyle kaydet. Metin olarak `evals/stt/cases.ts` dosyasındaki diyaloğu ("Günaydın Kaan, müşteri raporuna bakabildin mi?…") kullanabilirsin.
 
-- [ ] Dosyayı bilgisayara al (AirDrop ya da e-posta). **Yeni not** → **Dosya yükle** → onay kutusu → **Ses dosyası seç**.
-- [ ] Dosya adı, boyutu ve önizleme görünür → **Kaydı yükle**.
+- [ ] Dosyayı bilgisayara al (AirDrop ya da e-posta). **Yeni not** → **Dosya yükle** → **Dosya seç** → ses dosyasını seç → onay kutusunu işaretle.
+- [ ] Dosya adı, boyutu ve önizleme görünür. Onay kutusu işaretlenmeden **Kaydı yükle** kapalıdır; işaretleyip **Kaydı yükle**.
 - [ ] Transkriptte "Konuşmacı 1" ve "Konuşmacı 2" sırayla görünür; her konuşma doğru kişiye mi verilmiş?
 - [ ] Görevler: kargo sözleşmesini yeniden görüşmek, pazartesiye sunum hazırlamak gibi işler çıkmalı. Notta adı geçmeyen kimse sorumlu yapılmamalı.
 
 ### 9.3 Reddedilen dosyalar
 
-- [ ] **Dosya yükle** → bir `.txt` ya da `.pdf` dosyası seç → "Bu dosya türü desteklenmiyor…" görünür.
+- [ ] **Dosya yükle** → bir `.txt` ya da `.docx` dosyası seç → "Bu dosya türü desteklenmiyor…" görünür.
 - [ ] 26 MB'lık sahte bir dosya oluştur ve seç → "Dosya çok büyük (26 MB). En fazla 25 MB yükleyebilirsin." görünür.
   ```bash
   mkfile -n 26m ~/Desktop/buyuk-kayit.mp3
@@ -276,6 +276,25 @@ Bütçe yirmi bin liradan yirmi beş bin liraya çıkarıldı.
 
 - [ ] `npm run functions:serve` terminalini durdur (Ctrl+C), kısa bir kayıt yükle → "Kayıt yazıya dökülemedi" ve **Tekrar dene** görünür; kayıt oynatılabilir durumda kalır.
 - [ ] Fonksiyonu yeniden başlat → **Tekrar dene** → transkript ve görevler gelir.
+
+## 10. PDF (Faz 3)
+
+PDF'ten metin çıkarmak ücretsizdir ve AI hakkı kullanmaz. Yalnızca **Görevleri çıkar**'a basınca bir hak harcanır.
+
+Deneme için kendi bilgisayarındaki herhangi bir metinli PDF'i (örneğin bir ders notu ya da rapor) kullanabilirsin. Taranmış PDF denemesi için bir fotoğrafı PDF olarak kaydet (Önizleme → Dışa Aktar → PDF).
+
+- [ ] **Yeni not** → **Dosya yükle** → bir PDF seç → onay kutusu çıkmaz, **PDF'i yükle** → not sayfası açılır.
+- [ ] Başlık yazmadıysan not, dosyanın adını taşır (`Ders_Notu.pdf` → "Ders Notu").
+- [ ] "PDF okunuyor…" kısa sürer, sonra **PDF'in metni** kutusu açık gelir. Türkçe karakterler (ı, ğ, ş, İ) doğru mu?
+- [ ] **PDF'i aç** → PDF yeni sekmede açılır.
+- [ ] **Görevleri çıkar** → özet ve görevler gelir; metin kutusu kapanır.
+- [ ] **Notlar** → **PDF** filtresi → PDF görünür, kartta "Metin hazır" ya da "… görev" yazar. PDF'in içindeki bir kelimeyi ara → bulunur.
+- [ ] Fotoğraftan oluşan bir PDF yükle → "PDF okunamadı" ve "seçilebilir metin bulunamadı… taranmış…" açıklaması.
+- [ ] 10 MB'tan büyük bir PDF seç → yüklemeden önce "PDF çok büyük" uyarısı. Sahte dosya için:
+  ```bash
+  mkfile -n 11m ~/Desktop/buyuk.pdf
+  ```
+- [ ] Bir ses dosyası seç → onay kutusu çıkar ve işaretlenmeden **Kaydı yükle** kapalıdır.
 
 ---
 

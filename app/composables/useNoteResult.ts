@@ -41,6 +41,8 @@ export class ProcessNoteError extends Error {
 
 const PROCESS_FALLBACK_MESSAGE =
   'Not işlenemedi. Bağlantını kontrol edip tekrar dene; notun kaydedildi.'
+const EXTRACT_FALLBACK_MESSAGE =
+  'PDF okunamadı. Bağlantını kontrol edip tekrar dene; dosyan saklanıyor.'
 const TRANSCRIBE_FALLBACK_MESSAGE =
   'Kayıt yazıya dökülemedi. Bağlantını kontrol edip tekrar dene; kaydın saklanıyor.'
 
@@ -127,6 +129,21 @@ export function useNoteResult() {
     return data.signedUrl
   }
 
+  /** A link to open the PDF, valid for an hour; only the user's own files are signed. */
+  async function getDocumentUrl(storagePath: string): Promise<string> {
+    const { data, error } = await supabase.storage
+      .from('documents')
+      .createSignedUrl(storagePath, 60 * 60)
+    if (error || !data) throw new NoteServiceError('document_unavailable')
+    return data.signedUrl
+  }
+
+  /** Reads the text of a PDF (Edge Function); it is saved as the note's text. */
+  async function extractPdf(sourceId: string): Promise<void> {
+    const { error } = await supabase.functions.invoke('extract-pdf', { body: { sourceId } })
+    if (error) throw await toProcessNoteError(error, EXTRACT_FALLBACK_MESSAGE)
+  }
+
   /**
    * Starts transcribing a recording (Edge Function). It answers at once and works in the
    * background; the note's status shows when the transcript is ready.
@@ -171,6 +188,8 @@ export function useNoteResult() {
     listNoteTasks,
     getTranscript,
     getRecordingUrl,
+    getDocumentUrl,
+    extractPdf,
     processNote,
     transcribeAudio,
     saveDraft,
