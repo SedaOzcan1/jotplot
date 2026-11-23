@@ -61,10 +61,10 @@ Confirmed decisions are recorded here with their date and rationale. Pending que
 | 2026-11-24 | PDFs are at most 10 MB (private `documents` bucket) and 100 pages (checked by the function) | Seda chose 10 MB and 100 pages: enough for lecture notes and reports, and well inside the Edge Function's memory and time limits. |
 | 2026-11-24 | The "Dosya yükle" tab takes both recordings and PDFs. The consent box appears once a recording is picked and must be ticked before uploading; PDFs need no consent. A PDF without a title is named after its file | Seda chose one upload tab over a separate PDF tab, which keeps three tabs on phones. Consent is still confirmed before any recording is uploaded. |
 | 2026-11-24 | A PDF's text is only saved (for search and later questions); its summary and tasks are extracted with "Görevleri çıkar" when the user asks, using one AI request | Seda chose not to process PDFs automatically: many PDFs have no tasks, so automatic processing would spend AI requests for nothing. |
+| 2026-11-24 | Voyage `voyage-4` (1024 dimensions) creates the embeddings for search and questions (T3.2); stored text uses `input_type: document`, questions `query` | Seda chose it after `npm run eval:embeddings` compared it with OpenAI `text-embedding-3-small` and `-3-large` and Voyage 4 lite and large on Turkish passages (see `docs/EMBEDDING_COMPARISON.md`): it ranked every answer first, at $0.06 per million tokens. Before any personal data is sent, Voyage's data retention must be turned off in its dashboard (needs a payment method; cannot be undone). |
 
 ## Pending
 
-- Embedding provider.
 - Analytics provider.
 - F4 integration scope and provider details.
 - Faz 5 payment provider and pricing.

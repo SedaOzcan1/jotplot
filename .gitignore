@@ -39,3 +39,6 @@ evals/note-analysis/results/
 # Speech-to-text comparison (npm run eval:stt): recordings hold voices, results hold transcripts
 evals/stt/recordings/
 evals/stt/results/
+
+# Embedding comparison (npm run eval:embeddings)
+evals/embeddings/results/

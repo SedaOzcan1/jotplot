@@ -151,6 +151,5 @@ Ana butonlar, "+" butonu ve seçili filtreler lacivert → mavi → turkuaz grad
 
 - Ücretsiz plan için aylık AI isteği ve ses dakikası limitleri.
 - Ses dosyalarının saklama süresi.
-- LLM, embedding ve STT sağlayıcıları (STT için T2.1).
 - Analitik aracı.
 - Görsel kimlik: tipografi, logo, karanlık tema; renk paletinin kontrast (erişilebilirlik) kontrolü.

@@ -132,7 +132,7 @@ Akış: **kaydet → anla → sor**
 | Vektör | pgvector (Supabase) | RAG için |
 | **Backend mantığı** | **Supabase Edge Functions** | **Karar verildi:** Agent, STT ve RAG ön yüzden bağımsız API katmanında. API anahtarları tarayıcıya hiç inmez; ileride başka bir istemci (örn. MCP sunucusu, B8) aynı backend'i kullanabilir. |
 | LLM | Claude API (veya muadili) | Özet, görev çıkarma, RAG cevapları |
-| Embedding | Bir embedding API'si | Karar bekliyor |
+| Embedding | Voyage `voyage-4` (1024 boyut) | Karar verildi (2026-11-24) |
 | STT | Whisper API veya Deepgram | Türkçe kalitesi test edilecek |
 | Doğrulama | Zod | LLM çıktıları ve API girdileri |
 | Test | Vitest (birim), Playwright (uçtan uca) | |
@@ -286,7 +286,7 @@ Her görev Bölüm 8'deki **"tamamlandı" tanımına** uymalı.
 - [x] ~~Platform~~ → **Yalnızca web** (responsive). Native mobil (Capacitor / React Native) kapsam dışı.
 - [x] ~~İlk sürümde hangi mod?~~ → **Çalışan modu** (2026-11-12). Öğrenci modu MVP sonrasına kalır.
 - [x] ~~UI bileşen kütüphanesi~~ → **Nuxt UI** (2026-11-12), Tailwind tabanlı.
-- [ ] LLM ve embedding sağlayıcısı
+- [x] ~~LLM ve embedding sağlayıcısı~~ → **Claude Haiku 5.5** (2026-11-13) ve **Voyage `voyage-4`** (2026-11-24). Karşılaştırma `docs/EMBEDDING_COMPARISON.md`'de. Gerçek kullanıcı verisi gönderilmeden önce Voyage panelinden veri saklama kapatılmalı.
 - [x] ~~STT servisi~~ → **Deepgram Nova-3** (2026-11-23). Konuşmacı ayrımı ve kelime zaman damgası olan, en hızlı ve en ucuz seçenek; karşılaştırma `docs/STT_COMPARISON.md`'de.
 - [ ] Analitik aracı (PostHog mu, Google Analytics mi)
 - [ ] *(F4)* Sadece Jira Cloud mu, Jira Server / Data Center da mı? (Öneri: yalnızca Cloud.) Outlook ilk sürümde mi, sonra mı?
