@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { todayInTurkey } from '../../app/utils/board'
 import { createTestUser, signInThroughForm, signedOut } from './helpers'
 
 // Each test uses its own user with a few tasks on the default board.
@@ -183,4 +184,49 @@ test('when a move cannot be saved the card goes back and an error is shown', asy
   await expect(page.getByRole('alert').filter({ hasText: 'eski yerine döndü' })).toBeVisible()
   await expect(column(page, 'Yapılacak')).toContainText('Bütçeyi güncelle')
   expect(await statusOf(user, 'Bütçeyi güncelle')).toBe('todo')
+})
+
+test('cards warn about due dates and link to the note they came from', async ({ page }) => {
+  const { user, noteId } = await setUpBoard(page)
+  const { data: board } = await user.supabase
+    .from('boards')
+    .select('id')
+    .eq('is_default', true)
+    .single()
+  const shift = (days: number) => {
+    const day = new Date(`${todayInTurkey()}T00:00:00Z`)
+    day.setUTCDate(day.getUTCDate() + days)
+    return day.toISOString().slice(0, 10)
+  }
+  const { error } = await user.supabase.from('tasks').insert(
+    [
+      ['Geciken iş', shift(-2), 'todo'],
+      ['Bugünkü iş', shift(0), 'todo'],
+      ['Yarınki iş', shift(1), 'todo'],
+      ['Biten eski iş', shift(-5), 'done'],
+    ].map(([title, due_date, status], index) => ({
+      board_id: board!.id,
+      source_id: null,
+      title,
+      assignee: null,
+      due_date,
+      status,
+      position: 10 + index,
+    })),
+  )
+  if (error) throw error
+  await page.reload()
+
+  await expect(page.getByRole('button', { name: /Geciken iş/ })).toContainText('Gecikti ·')
+  await expect(page.getByRole('button', { name: /Bugünkü iş/ })).toContainText('Bugün ·')
+  await expect(page.getByRole('button', { name: /Yarınki iş/ })).toContainText('Yarın ·')
+  // The Tamamlandı column is a hidden tab on phones, so the card is found without its role.
+  const finished = page.locator('li').filter({ hasText: 'Biten eski iş' })
+  await expect(finished).toHaveCount(1)
+  await expect(finished).not.toContainText('Gecikti')
+
+  // Only the task from a note has the note badge; it opens the note.
+  await expect(page.getByRole('link', { name: /^Kaynak not:/ })).toHaveCount(1)
+  await page.getByRole('link', { name: 'Kaynak not: Kampanya toplantısı' }).click()
+  await expect(page).toHaveURL(new RegExp(`/notes/${noteId}$`))
 })

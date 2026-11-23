@@ -6,7 +6,7 @@ export interface Board {
 }
 
 const TASK_COLUMNS =
-  'id, title, assignee, due_date, status, position, source_id, sources(title, raw_text)'
+  'id, title, assignee, due_date, status, position, source_id, sources(title, raw_text, type)'
 
 function toNoteServiceError(error: { code?: string | null }) {
   return new NoteServiceError(error.code === '42501' ? 'not_signed_in' : error.code || 'unknown')
