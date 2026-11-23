@@ -1,6 +1,6 @@
 # Jotplot — Elle Test Rehberi
 
-Bu rehber, Faz 1 özelliklerini uygulamada elle denemek içindir. Örnek notları kopyalayıp yapıştırabilirsin. Notlar ve kişiler uydurmadır; aynı notlar otomatik AI kalite testinde (`npm run eval:ai`, aşağıda) de kullanılır, bu yüzden metinleri değiştirirsen `evals/note-analysis/cases.ts` dosyasını da güncelle.
+Bu rehber, Faz 1 ve Faz 2 özelliklerini uygulamada elle denemek içindir. Örnek notları kopyalayıp yapıştırabilirsin. Notlar ve kişiler uydurmadır; aynı notlar otomatik AI kalite testinde (`npm run eval:ai`, aşağıda) de kullanılır, bu yüzden metinleri değiştirirsen `evals/note-analysis/cases.ts` dosyasını da güncelle.
 
 > "Görevleri çıkar" her basışta gerçek AI'ı çağırır: bir kullanım hakkı (ayda 50) ve yaklaşık $0,0006 harcar. Bu rehberin tamamı 15–20 istek kullanır.
 
@@ -10,7 +10,7 @@ Bu rehber, Faz 1 özelliklerini uygulamada elle denemek içindir. Örnek notlar�
 2. Üç ayrı terminalde:
    ```bash
    npm run db:start          # yerel Supabase
-   npm run functions:serve   # AI fonksiyonu (supabase/functions/.env içindeki anahtarla)
+   npm run functions:serve   # AI ve yazıya dökme fonksiyonları (supabase/functions/.env içindeki anahtarlarla)
    npm run dev               # uygulama
    ```
 3. Tarayıcıda **http://localhost:3000** adresini aç (`127.0.0.1` değil; Google ile giriş yalnızca `localhost`'ta çalışır).
@@ -183,7 +183,112 @@ Bölüm 3'teki notları ekledikten sonra **Notlar** sayfasında:
 - [ ] `npm run functions:serve` terminalini durdur (Ctrl+C), bir notta **Görevleri çıkar** → anlaşılır bir hata ve **Tekrar dene** görünür, not silinmez. Fonksiyonu yeniden başlatıp **Tekrar dene** → sonuç gelir.
 - [ ] Yeni not yazarken Wi-Fi'ı kapatıp **Notu kaydet** → "Not kaydedilemedi. Yazdığın metin duruyor…" görünür, metin kaybolmaz.
 
+## 9. Ses kayıtları (Faz 2)
+
+> Her kayıt gerçek servisleri çağırır. Yazıya dökme kaydın uzunluğu kadar ses dakikası (ayda 30) ve dakikası yaklaşık $0,0043 harcar. Ardından görev çıkarma bir AI hakkı kullanır. Bu bölümün tamamı 5 dakikadan az ses ve 3–4 AI hakkı kullanır.
+
+Mikrofon yalnızca **http://localhost:3000** adresinde çalışır; telefondan yerel sürüme bağlanıp kayıt yapamazsın. Telefonda gerçek deneme yayına çıkınca yapılacak.
+
+### Okunacak metin
+
+Kendi sesinle, normal hızda oku (yaklaşık 40 saniye). Kişiler ve rakamlar uydurmadır.
+
+```text
+Pazartesi ekip toplantısını yaptık. Katılanlar Elif, Murat ve Zeynep.
+Yeni web sitesinin yayın tarihi on beş Aralık olarak belirlendi.
+Elif ana sayfa tasarımını cuma gününe kadar bitirecek.
+Murat iletişim formundaki hatayı yarın düzeltecek.
+Zeynep blog yazılarını ay sonuna kadar hazırlayacak.
+Sunucu taşıma işi konuşuldu ama kimin yapacağı belli değil.
+Bütçe yirmi bin liradan yirmi beş bin liraya çıkarıldı.
+```
+
+**Beklenen sonuç** (tarihler kaydı yaptığın güne göre):
+
+| Görev | Sorumlu | Tarih |
+|---|---|---|
+| Ana sayfa tasarımını bitir | Elif | sonraki ilk cuma |
+| İletişim formundaki hatayı düzelt | Murat | yarın |
+| Blog yazılarını hazırla | Zeynep | ayın son günü |
+| Sunucuyu taşı | **yok** | **yok** |
+
+- **Kararlar:** yayın tarihi 15 Aralık; bütçe 20.000 TL'den 25.000 TL'ye çıkarıldı.
+- Sorumlusu belli olmayan iş için isim uydurulmamalı.
+
+### 9.1 Tarayıcıdan kayıt
+
+- [ ] **Yeni not** → **Kaydet** sekmesi. **Kaydı başlat** kapalıdır ve "Başlamak için önce onay kutusunu işaretle." yazar.
+- [ ] Onay kutusunu işaretle → **Kaydı başlat** açılır. Bas, tarayıcının mikrofon iznini ver.
+- [ ] "Kaydediliyor", kırmızı nokta ve artan süre görünür. Metni oku.
+- [ ] Ortada **Duraklat** → "Duraklatıldı", süre durur. **Devam et** → süre kaldığı yerden devam eder.
+- [ ] Kayıt sürerken **Yaz** sekmesine geçip geri dön → kayıt devam ediyor olmalı.
+- [ ] **Kaydı bitir** → süre ve boyutla birlikte önizleme oynatıcısı çıkar. Dinle.
+- [ ] **Sil ve yeniden kaydet** → baştaki ekrana dönülür. Metni tekrar kaydet.
+- [ ] Başlığa `Web sitesi toplantısı` yaz → **Kaydı yükle** → ilerleme çubuğu, sonra not sayfası açılır.
+- [ ] Not sayfasında üstte ses oynatıcı ve "Kaydın yazıya dökülüyor…" görünür. Birkaç saniye sonra "Görevler çıkarılıyor…", ardından sonuç ekranı gelir; sayfayı yenilemen gerekmez.
+- [ ] Görevler ve kararlar yukarıdaki tabloyla uyuşuyor mu? İsimler doğru yazılmış mı (Elif, Murat, Zeynep)?
+- [ ] **Transkript** kutusu kapalı gelir; aç. Metin okuduğuna yakın mı? Tek konuşmacı olduğun için "Konuşmacı" etiketi görünmez.
+- [ ] Transkriptteki bir zamana (örneğin **0:10**) tıkla → ses o andan çalar, çalan paragraf turkuaz olur.
+- [ ] **Panoya ekle** → görevler panoya gider.
+
+### 9.2 Dosya yükleme ve iki konuşmacı
+
+İki kişiyle (ya da sesini değiştirerek iki rol yaparak) telefonun ses kaydedicisiyle kaydet. Metin olarak `evals/stt/cases.ts` dosyasındaki diyaloğu ("Günaydın Kaan, müşteri raporuna bakabildin mi?…") kullanabilirsin.
+
+- [ ] Dosyayı bilgisayara al (AirDrop ya da e-posta). **Yeni not** → **Dosya yükle** → onay kutusu → **Ses dosyası seç**.
+- [ ] Dosya adı, boyutu ve önizleme görünür → **Kaydı yükle**.
+- [ ] Transkriptte "Konuşmacı 1" ve "Konuşmacı 2" sırayla görünür; her konuşma doğru kişiye mi verilmiş?
+- [ ] Görevler: kargo sözleşmesini yeniden görüşmek, pazartesiye sunum hazırlamak gibi işler çıkmalı. Notta adı geçmeyen kimse sorumlu yapılmamalı.
+
+### 9.3 Reddedilen dosyalar
+
+- [ ] **Dosya yükle** → bir `.txt` ya da `.pdf` dosyası seç → "Bu dosya türü desteklenmiyor…" görünür.
+- [ ] 26 MB'lık sahte bir dosya oluştur ve seç → "Dosya çok büyük (26 MB). En fazla 25 MB yükleyebilirsin." görünür.
+  ```bash
+  mkfile -n 26m ~/Desktop/buyuk-kayit.mp3
+  ```
+  Bitince dosyayı sil.
+
+### 9.4 Kayıt kaybolmasın
+
+- [ ] Kayıt sürerken sekmeyi kapatmayı ya da başka bir sayfaya gitmeyi dene → tarayıcı uyarı gösterir.
+- [ ] Kısa bir kayıt yap, **Kaydı bitir**. Wi-Fi'ı kapat → **Kaydı yükle** → "Kayıt yüklenemedi. Kaydın bu sayfada duruyor…" ve **Kaydı cihazıma indir** bağlantısı görünür.
+- [ ] Wi-Fi'ı aç → **Tekrar dene** → kayıt yüklenir.
+
+### 9.5 Not listesi
+
+- [ ] **Notlar**: ses kartlarında tür "Ses" yazar. Görevleri çıkarılmış kayıtta "… görev · … karar", işlenirken "İşleniyor…" görünür. Başlıksız kayıt "Ses kaydı" adıyla görünür.
+- [ ] **Ses** filtresi yalnızca kayıtları gösterir.
+
+### 9.6 Ses dakikası ve AI limiti
+
+- [ ] **Ayarlar → Bu ayki kullanım**: ikinci çubukta "… / 30 dk ses kaydı". Yaptığın kayıtların süresi kadar artmış olmalı.
+- [ ] Dakikayı yerelde 30 yap (e-postanı yaz):
+  ```bash
+  docker exec supabase_db_jotplot psql -U postgres -c "update public.usage set stt_minutes = 30 where user_id = (select id from auth.users where email = 'SENIN_EPOSTAN')"
+  ```
+  - [ ] **Ayarlar**: kırmızı çubuk ve "Bu ayki 30 dakikalık ses hakkını doldurdun…" mesajı.
+  - [ ] **Kaydet** sekmesinin üstünde aynı uyarı görünür. Kısa bir kayıt yükle → not sayfasında "Bu ayki ses dakikan doldu" ve **Kullanımı gör** çıkar; kayıt saklanır.
+  - [ ] Dakikayı geri al (`stt_minutes = 0`), o kaydın sayfasını yenile → yazıya dökme kendiliğinden başlar.
+- [ ] AI hakkını 50 yap (7. bölümdeki komut) ve kısa bir kayıt yükle → transkript gelir ama görevler çıkmaz; "Bu not henüz işlenmedi" ve **Görevleri çıkar** görünür. Hakkı sıfırlayıp **Görevleri çıkar** → görevler gelir.
+
+### 9.7 Fonksiyon kapalıyken
+
+- [ ] `npm run functions:serve` terminalini durdur (Ctrl+C), kısa bir kayıt yükle → "Kayıt yazıya dökülemedi" ve **Tekrar dene** görünür; kayıt oynatılabilir durumda kalır.
+- [ ] Fonksiyonu yeniden başlat → **Tekrar dene** → transkript ve görevler gelir.
+
 ---
+
+## Otomatik konuşmadan yazıya kalite testi
+
+Kayıtlarını `evals/stt/recordings/` klasörüne `1-…`, `2-…`, `3-…` adlarıyla koyup servisleri karşılaştırabilirsin (bu klasör git'e girmez):
+
+```bash
+npm run eval:stt                     # tüm kayıtlar, tüm servisler
+npm run eval:stt -- deepgram-nova-3  # yalnızca Deepgram
+```
+
+Okunacak metinler `evals/stt/cases.ts` dosyasında, son sonuçlar `docs/STT_COMPARISON.md`'de.
 
 ## Otomatik AI kalite testi
 
