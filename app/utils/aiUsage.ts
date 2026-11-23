@@ -5,6 +5,9 @@ export interface AiUsage {
   plan: string
   /** First day of the month the usage counts, YYYY-MM-DD in Turkish time. */
   period: string
+  /** Speech-to-text minutes used this month and the plan's monthly minutes (T2.3). */
+  sttMinutes: number
+  sttLimit: number
 }
 
 /** Share of the limit at which the user is warned that it is close. */
@@ -50,6 +53,29 @@ export function aiUsageMessage(usage: AiUsage): string | null {
   }
   if (level === 'near') {
     return `Bu ay ${remainingRequests(usage)} AI işleme hakkın kaldı. Hakkın ${formatResetDateLocative(usage.period)} yenilenir.`
+  }
+  return null
+}
+
+/** Same levels for speech-to-text minutes. */
+export function sttUsageLevel(usage: Pick<AiUsage, 'sttMinutes' | 'sttLimit'>): AiUsageLevel {
+  return aiUsageLevel({ used: usage.sttMinutes, limit: usage.sttLimit })
+}
+
+/** Whole minutes as is, others with one decimal: "12", "12,5". */
+export function formatMinutes(minutes: number) {
+  return minutes.toLocaleString('tr-TR', { maximumFractionDigits: 1 })
+}
+
+/** Turkish message about recording minutes; null when there is nothing to say. */
+export function sttUsageMessage(usage: AiUsage): string | null {
+  const level = sttUsageLevel(usage)
+  if (level === 'reached') {
+    return `Bu ayki ${usage.sttLimit} dakikalık ses hakkını doldurdun. Kayıtların saklanır; hakkın ${formatResetDateLocative(usage.period)} yenilenince yazıya dökebilirsin.`
+  }
+  if (level === 'near') {
+    const left = formatMinutes(Math.max(usage.sttLimit - usage.sttMinutes, 0))
+    return `Bu ay ${left} dakikalık ses hakkın kaldı. Daha uzun bir kayıt da yazıya dökülür, ama sonrasında hakkın ${formatResetDateLocative(usage.period)} yenilenene kadar yeni kayıt dökülmez.`
   }
   return null
 }

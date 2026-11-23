@@ -67,9 +67,21 @@ export interface NoteListItem {
   tasks: { count: number }[] | null
 }
 
+const AUDIO_STATUS_LINES: Record<string, string> = {
+  pending: 'Yazıya dökülmeyi bekliyor',
+  processing: 'Yazıya dökülüyor…',
+  failed: 'Yazıya dökülemedi',
+  ready: 'Transkript hazır',
+}
+
 /** Short status line for a note card: "3 görev · 2 karar", "İşleniyor…", and so on. */
-export function noteStatusLine(note: Pick<NoteListItem, 'status' | 'summaries' | 'tasks'>) {
+export function noteStatusLine(
+  note: Pick<NoteListItem, 'status' | 'summaries' | 'tasks'> & { type?: string },
+) {
   const summary = note.summaries?.[0]
+  if (!summary && note.type === 'audio') {
+    return AUDIO_STATUS_LINES[note.status] ?? AUDIO_STATUS_LINES.pending!
+  }
   if (!summary) {
     return note.status === 'processing'
       ? 'İşleniyor…'

@@ -7,7 +7,7 @@ useSeoMeta({ title: 'Sonuç' })
 const route = useRoute()
 const router = useRouter()
 const id = computed(() => String(route.params.id))
-const { getNote, getSummary, listNoteTasks, processNote } = useNoteResult()
+const { getNote, getSummary, listNoteTasks, getTranscript, processNote } = useNoteResult()
 const ready = useIsMounted()
 
 // Personal data: loaded in the browser only.
@@ -15,9 +15,13 @@ const { data, status, error, refresh } = useAsyncData(
   () => `note-${id.value}`,
   async () => {
     const note = await getNote(id.value)
-    if (!note) return { note: null, summary: null, boardTasks: [] }
-    const [summary, boardTasks] = await Promise.all([getSummary(note.id), listNoteTasks(note.id)])
-    return { note, summary, boardTasks }
+    if (!note) return { note: null, summary: null, boardTasks: [], transcript: null }
+    const [summary, boardTasks, transcript] = await Promise.all([
+      getSummary(note.id),
+      listNoteTasks(note.id),
+      note.type === 'audio' ? getTranscript(note.id) : null,
+    ])
+    return { note, summary, boardTasks, transcript }
   },
   { server: false },
 )
@@ -110,18 +114,12 @@ const showFailure = computed(
         </p>
       </header>
 
-      <div
+      <AudioNoteStatus
         v-if="note.type === 'audio'"
-        role="status"
-        class="flex flex-col items-center gap-3 rounded-xl bg-white px-4 py-10 text-center ring-1 ring-navy-100"
-      >
-        <UIcon name="i-lucide-file-audio" class="size-8 text-navy-500" aria-hidden="true" />
-        <p class="font-semibold text-navy-900">Kayıt yüklendi</p>
-        <p class="max-w-md text-sm text-slate-500">
-          Kaydın güvenle saklanıyor. Yazıya dökülmesi ve görevlerin çıkarılması bir sonraki adımda
-          bu sayfada görünecek.
-        </p>
-      </div>
+        :note="note"
+        :transcript="data?.transcript ?? null"
+        @refresh="refresh()"
+      />
 
       <details v-else-if="note.raw_text" class="rounded-xl bg-white ring-1 ring-navy-100">
         <summary class="cursor-pointer px-4 py-3 text-sm font-medium text-navy-900">

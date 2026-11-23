@@ -5,6 +5,11 @@ import type { AudioNoteDraft } from '~/composables/useAudioNotes'
 const props = defineProps<{ source: 'record' | 'upload' }>()
 
 const { createAudioNote } = useAudioNotes()
+const { getAiUsage } = useAiUsage()
+// Shown before recording; the server still enforces the limit.
+const { data: usage } = useAsyncData('ai-usage', () => getAiUsage(), { server: false })
+const minutesMessage = computed(() => (usage.value ? sttUsageMessage(usage.value) : null))
+const minutesUsedUp = computed(() => !!usage.value && sttUsageLevel(usage.value) === 'reached')
 const recorder = useAudioRecorder()
 const { mode } = useAppMode()
 const toast = useToast()
@@ -121,6 +126,14 @@ const consentLabel =
 
 <template>
   <div class="max-w-3xl space-y-4">
+    <UAlert
+      v-if="minutesMessage"
+      :color="minutesUsedUp ? 'warning' : 'info'"
+      variant="subtle"
+      icon="i-lucide-gauge"
+      :description="minutesMessage"
+    />
+
     <ModeSwitch label="Notun modu" />
 
     <UFormField label="Kaydın başlığı (isteğe bağlı)">
@@ -152,7 +165,11 @@ const consentLabel =
           </p>
         </div>
       </div>
-      <UCheckbox v-model="consent" :label="consentLabel" :disabled="recording || uploading" />
+      <UCheckbox
+        v-model="consent"
+        :label="consentLabel"
+        :disabled="!ready || recording || uploading"
+      />
     </section>
 
     <!-- Recording ---------------------------------------------------------------------------- -->

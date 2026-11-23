@@ -32,8 +32,11 @@ Faz 2 — audio (in progress).
 - [x] Complete T1.1–T1.9 as tracked in `PROJECT.md`.
 - [x] T2.1 Speech-to-text provider comparison; Deepgram Nova-3 chosen (PR #23).
 - [x] T2.2 Audio recording and upload.
+- [x] T2.3 Transcription Edge Function with Deepgram.
 
 ## Latest Update
+
+2026-11-23: T2.3 is done. The `transcribe-audio` Edge Function sends a saved recording to Deepgram Nova-3 in one piece and works in the background; the note page starts it on its own and shows "Yazıya dökülüyor…", the transcript, a failure with "Tekrar dene", or the monthly limit. Transcripts are saved with speakers and times, and minutes go to `usage`. Limits are 30 minutes a month on the free plan and 300 on premium, shown on the settings page. A local run with a synthetic 41-second recording was transcribed in about 2 seconds. Next: T2.4, extracting tasks from the transcript automatically.
 
 2026-11-23: T2.2 is done. The new note screen has "Yaz", "Kaydet", and "Dosya yükle" tabs. Recording works in the browser with pause, a timer, and a Screen Wake Lock that keeps the phone screen on; files up to 25 MB can be uploaded. Both need a consent confirmation first, and its time is saved with the note. Uploads show progress, and a failed upload keeps the audio on the page to try again. Files go to a private Storage bucket where each user can reach only their own folder. Audio notes are not transcribed yet. Next: T2.3, the transcription Edge Function with Deepgram.
 

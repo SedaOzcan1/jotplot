@@ -1,5 +1,12 @@
 import { expect, test, type Page } from '@playwright/test'
-import { createTestUser, signInThroughForm, signedOut, type TestUser } from './helpers'
+import {
+  createTestUser,
+  fakeTranscribeAudio,
+  signInThroughForm,
+  signedOut,
+  TRANSCRIBE_AUDIO_URL,
+  type TestUser,
+} from './helpers'
 
 // Chromium's fake microphone plays a test tone, so recording works without a real device.
 // Files go to the local Supabase Storage; no speech-to-text service is called.
@@ -33,12 +40,15 @@ function silentWav(seconds = 1, sampleRate = 8000) {
 }
 
 async function openTab(page: Page, tab: 'Kaydet' | 'Dosya yükle') {
+  // The note page starts transcription on its own; these tests are only about saving the audio.
+  await page.route(TRANSCRIBE_AUDIO_URL, fakeTranscribeAudio({ outcome: 'ignore' }))
   const user = await createTestUser('audio')
   await page.goto('/login')
   await signInThroughForm(page, user.email, user.password)
   await expect(page).toHaveURL(/\/notes$/)
-  await page.goto('/notes/new')
-  await page.getByRole('tab', { name: tab }).click()
+  // Open the tab by its address: a click before the page is interactive would be lost.
+  await page.goto(`/notes/new?tab=${tab === 'Kaydet' ? 'record' : 'upload'}`)
+  await expect(page.getByRole('tab', { name: tab })).toHaveAttribute('aria-selected', 'true')
   return user
 }
 

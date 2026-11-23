@@ -11,6 +11,12 @@ export interface NoteDetail {
   created_at: string
 }
 
+/** A recording's transcript (T2.3); `segments` hold speakers and times for the transcript screen. */
+export interface NoteTranscript {
+  text: string
+  duration_sec: number | null
+}
+
 export interface NoteTask {
   id: string
   title: string
@@ -31,9 +37,14 @@ export class ProcessNoteError extends Error {
 
 const PROCESS_FALLBACK_MESSAGE =
   'Not işlenemedi. Bağlantını kontrol edip tekrar dene; notun kaydedildi.'
+const TRANSCRIBE_FALLBACK_MESSAGE =
+  'Kayıt yazıya dökülemedi. Bağlantını kontrol edip tekrar dene; kaydın saklanıyor.'
 
 /** Reads `{ error: { code, message } }` from a failed function response. */
-async function toProcessNoteError(error: unknown): Promise<ProcessNoteError> {
+async function toProcessNoteError(
+  error: unknown,
+  fallbackMessage = PROCESS_FALLBACK_MESSAGE,
+): Promise<ProcessNoteError> {
   const context = (error as { context?: unknown } | null)?.context
   if (context instanceof Response) {
     const body = (await context.json().catch(() => null)) as {
@@ -43,7 +54,7 @@ async function toProcessNoteError(error: unknown): Promise<ProcessNoteError> {
       return new ProcessNoteError(body.error.code ?? 'unknown', body.error.message)
     }
   }
-  return new ProcessNoteError('unknown', PROCESS_FALLBACK_MESSAGE)
+  return new ProcessNoteError('unknown', fallbackMessage)
 }
 
 function toNoteServiceError(error: { code?: string | null }) {
@@ -90,6 +101,25 @@ export function useNoteResult() {
     if (error) throw await toProcessNoteError(error)
   }
 
+  async function getTranscript(sourceId: string): Promise<NoteTranscript | null> {
+    const { data, error } = await supabase
+      .from('transcripts')
+      .select('text, duration_sec')
+      .eq('source_id', sourceId)
+      .maybeSingle()
+    if (error) throw toNoteServiceError(error)
+    return data
+  }
+
+  /**
+   * Starts transcribing a recording (Edge Function). It answers at once and works in the
+   * background; the note's status shows when the transcript is ready.
+   */
+  async function transcribeAudio(sourceId: string): Promise<void> {
+    const { error } = await supabase.functions.invoke('transcribe-audio', { body: { sourceId } })
+    if (error) throw await toProcessNoteError(error, TRANSCRIBE_FALLBACK_MESSAGE)
+  }
+
   /** Saves edits without adding tasks to the board, so nothing typed is lost. */
   async function saveDraft(summaryId: string, result: ResultPayload): Promise<void> {
     const { error } = await supabase
@@ -119,5 +149,14 @@ export function useNoteResult() {
     return data
   }
 
-  return { getNote, getSummary, listNoteTasks, processNote, saveDraft, approve }
+  return {
+    getNote,
+    getSummary,
+    listNoteTasks,
+    getTranscript,
+    processNote,
+    transcribeAudio,
+    saveDraft,
+    approve,
+  }
 }

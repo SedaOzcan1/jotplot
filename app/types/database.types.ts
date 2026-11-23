@@ -178,11 +178,14 @@ isOneToOne: false
                            },
 "get_my_ai_usage":
 { Args: Record<PropertyKey, never>; Returns: {
-              "period": string,"plan": string,"request_limit": number,"used": number
+              "period": string,"plan": string,"request_limit": number,"stt_minute_limit": number,"stt_minutes": number,"used": number
             }[]
                            },
 "record_ai_usage":
 { Args: { "p_cost_usd": number,"p_tokens_in": number,"p_tokens_out": number,"p_user_id": string }; Returns: undefined
+                           },
+"record_stt_usage":
+{ Args: { "p_cost_usd": number,"p_minutes": number,"p_user_id": string }; Returns: undefined
                            },
 "release_ai_request":
 { Args: { "p_user_id": string }; Returns: undefined
@@ -212,7 +215,16 @@ isOneToOne: false
         to: "sources"
         isOneToOne: false
         isSetofReturn: true
-      } }
+      } },
+"start_transcription":
+{ Args: { "p_source_id": string }; Returns: boolean
+                           },
+"stt_minute_limit":
+{ Args: { "p_plan": string }; Returns: number
+                           },
+"stt_minutes_remaining":
+{ Args: { "p_user_id": string }; Returns: number
+                           }
           }
           Enums: {
             [_ in never]: never
