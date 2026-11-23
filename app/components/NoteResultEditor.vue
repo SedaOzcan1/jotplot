@@ -23,6 +23,7 @@ const titleErrors = ref<Record<string, string>>({})
 const approving = ref(false)
 const approveError = ref<string | null>(null)
 const confirmingRetry = ref(false)
+const confirmingApprove = ref(false)
 
 // Edits are saved automatically shortly after the user stops typing.
 type SaveState = 'idle' | 'saving' | 'saved' | 'error'
@@ -69,6 +70,7 @@ watch(
     skipNextSave = true
     result.value = toEditableResult(summary)
     titleErrors.value = {}
+    confirmingApprove.value = false
   },
 )
 
@@ -95,11 +97,18 @@ function removeTask(key: string) {
   )
 }
 
-async function onApprove() {
+async function onApprove({ confirmed = false } = {}) {
   approveError.value = null
+  confirmingApprove.value = false
   titleErrors.value = taskTitleErrors(result.value.tasks)
   if (Object.keys(titleErrors.value).length) {
     approveError.value = 'Panoya eklemeden önce her göreve bir başlık yaz.'
+    return
+  }
+  // Tasks from this note are already on the board, so adding again may create duplicates.
+  if (!confirmed && props.boardTasks.length && result.value.tasks.length) {
+    confirmingRetry.value = false
+    confirmingApprove.value = true
     return
   }
   approving.value = true
@@ -121,6 +130,11 @@ async function onApprove() {
   } finally {
     approving.value = false
   }
+}
+
+function onRetryClick() {
+  confirmingApprove.value = false
+  confirmingRetry.value = true
 }
 
 function onRetry() {
@@ -273,6 +287,26 @@ function onRetry() {
       </div>
     </div>
 
+    <div
+      v-if="confirmingApprove"
+      role="alertdialog"
+      aria-labelledby="approve-again-title"
+      class="space-y-3 rounded-xl bg-white p-4 ring-1 ring-navy-100"
+    >
+      <p id="approve-again-title" class="text-sm text-navy-900">
+        Bu nottan panoda zaten {{ boardTasks.length }} görev var. Eklersen
+        {{ result.tasks.length }} görev daha eklenecek; bazıları panoda iki kez görünebilir.
+      </p>
+      <div class="flex flex-wrap gap-2">
+        <UButton color="neutral" variant="outline" @click="confirmingApprove = false">
+          Vazgeç
+        </UButton>
+        <UButton class="bg-brand-gradient" @click="onApprove({ confirmed: true })">
+          Yine de ekle
+        </UButton>
+      </div>
+    </div>
+
     <div class="grid grid-cols-2 gap-3">
       <UButton
         size="xl"
@@ -281,7 +315,7 @@ function onRetry() {
         variant="outline"
         :disabled="!ready || reprocessing || approving"
         :loading="reprocessing"
-        @click="confirmingRetry = true"
+        @click="onRetryClick"
       >
         Tekrar dene
       </UButton>
@@ -291,7 +325,7 @@ function onRetry() {
         class="bg-brand-gradient"
         :disabled="!ready || reprocessing || !result.tasks.length"
         :loading="approving"
-        @click="onApprove"
+        @click="onApprove()"
       >
         Panoya ekle
       </UButton>
