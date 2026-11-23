@@ -137,7 +137,7 @@ Dosyada kaba wireframe'ler var: 10 mobil çerçeve (375 px; ekran 2 ve 4 için i
 | Kenarlık | `#CBD5E1` |
 | Metin / ikincil metin | `#0F172A` / `#64748B` |
 
-Ana butonlar, "+" butonu ve seçili filtreler lacivert → mavi → turkuaz gradient kullanır; görev kartlarında turkuaz bir sol şerit vardır. Masaüstü kenar çubuğu laciverttir.
+Ana butonlar, "+" butonu ve seçili filtreler lacivert → mavi → turkuaz gradient kullanır; görev kartlarının sol şeridi teslim tarihine göre renklenir (gecikmiş kırmızı, bugün/yarın turuncu, diğerleri turkuaz, tamamlanan gri). Masaüstü kenar çubuğu laciverttir.
 
 ## 6. Kapsam dışı (MVP)
 

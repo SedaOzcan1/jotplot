@@ -2,8 +2,11 @@ import { describe, expect, it } from 'vitest'
 import {
   type BoardTask,
   columnTasks,
+  dueState,
   moveTask,
   positionFor,
+  sourceIcon,
+  todayInTurkey,
   toTaskFields,
   toTaskForm,
   validateTaskForm,
@@ -97,5 +100,42 @@ describe('task form', () => {
       dueDate: '',
       status: 'done',
     })
+  })
+})
+
+describe('due dates', () => {
+  const today = '2026-11-23'
+  const on = (due_date: string | null, status: BoardTask['status'] = 'todo') =>
+    dueState({ due_date, status }, today)
+
+  it('tells overdue, today, tomorrow, and later apart', () => {
+    expect(on('2026-11-22')).toBe('overdue')
+    expect(on('2026-11-23')).toBe('today')
+    expect(on('2026-11-24')).toBe('tomorrow')
+    expect(on('2026-11-25')).toBe('upcoming')
+    expect(on(null)).toBe('none')
+  })
+
+  it('never calls a finished task late', () => {
+    expect(on('2026-01-01', 'done')).toBe('done')
+  })
+
+  it('counts tomorrow across a month and a year', () => {
+    expect(dueState({ due_date: '2026-12-01', status: 'doing' }, '2026-11-30')).toBe('tomorrow')
+    expect(dueState({ due_date: '2027-01-01', status: 'todo' }, '2026-12-31')).toBe('tomorrow')
+  })
+
+  it('uses Turkish time for today', () => {
+    // 22:30 UTC on 23 November is already 24 November in Istanbul (UTC+3).
+    expect(todayInTurkey(new Date('2026-11-23T22:30:00Z'))).toBe('2026-11-24')
+    expect(todayInTurkey(new Date('2026-11-23T20:59:00Z'))).toBe('2026-11-23')
+  })
+})
+
+describe('sourceIcon', () => {
+  it('shows a microphone for recordings and a page for written notes', () => {
+    expect(sourceIcon('audio')).toBe('i-lucide-mic')
+    expect(sourceIcon('text')).toBe('i-lucide-file-text')
+    expect(sourceIcon('pdf')).toBe('i-lucide-file')
   })
 })
