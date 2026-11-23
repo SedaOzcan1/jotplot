@@ -9,7 +9,6 @@ async function setUpNotes(page: Page, extraTextNotes = 0) {
   const rows = [
     { type: 'text', title: 'İstanbul ofisi taşınması', raw_text: 'Taşınma planı konuşuldu.' },
     { type: 'text', title: 'Sprint planlama', raw_text: 'Bütçe %20 artırıldı.' },
-    { type: 'audio', title: 'Müşteri görüşmesi kaydı', raw_text: null },
     ...Array.from({ length: extraTextNotes }, (_, i) => ({
       type: 'text',
       title: `Haftalık not ${i + 1}`,
@@ -18,6 +17,17 @@ async function setUpNotes(page: Page, extraTextNotes = 0) {
   ]
   const { error } = await user.supabase.from('sources').insert(rows)
   if (error) throw error
+  // An audio note needs its file path and consent time; the file itself is not needed here.
+  const { data: auth } = await user.supabase.auth.getUser()
+  const audioId = crypto.randomUUID()
+  const audio = await user.supabase.from('sources').insert({
+    id: audioId,
+    type: 'audio',
+    title: 'Müşteri görüşmesi kaydı',
+    storage_path: `${auth.user!.id}/${audioId}.m4a`,
+    consent_confirmed_at: new Date().toISOString(),
+  })
+  if (audio.error) throw audio.error
 
   await page.goto('/login')
   await signInThroughForm(page, user.email, user.password)

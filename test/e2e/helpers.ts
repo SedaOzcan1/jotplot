@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { expect, type Page, type Route } from '@playwright/test'
 
 /** Signed-in browser state shared by the desktop and mobile projects (git-ignored). */
@@ -83,5 +83,102 @@ export function fakeProcessNote(user: TestUser) {
     if (saved.error) throw saved.error
     await user.supabase.from('sources').update({ status: 'ready' }).eq('id', sourceId)
     await route.fulfill({ json: { sourceId, summaryId: saved.data.id }, headers: CORS_HEADERS })
+  }
+}
+
+let service: SupabaseClient | undefined
+
+/**
+ * A client with the local Supabase service role, for test stand-ins that do what only the server
+ * may do (writing transcripts). The key is the local development key that `supabase status`
+ * prints (see playwright.config.ts), never a hosted project's key.
+ */
+export function serviceClient(): SupabaseClient {
+  if (service) return service
+  const url = process.env.SUPABASE_URL
+  if (!url) throw new Error('SUPABASE_URL must be set for E2E tests')
+  // Read from `supabase status` by playwright.config.ts.
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is missing; is local Supabase running?')
+  service = createClient(url, key, { auth: { persistSession: false } })
+  return service
+}
+
+export const TRANSCRIBE_AUDIO_URL = '**/functions/v1/transcribe-audio'
+
+export type FakeTranscription =
+  | { outcome: 'ready'; text: string; durationSec?: number }
+  | { outcome: 'failed' }
+  | { outcome: 'limit' }
+  /** Accepts the request and does nothing, for tests that are not about transcription. */
+  | { outcome: 'ignore' }
+
+/**
+ * Stands in for the transcribe-audio Edge Function so tests never call Deepgram. Like the real
+ * function it answers 202 at once and finishes a moment later in the background, writing the
+ * transcript with the service role.
+ */
+export function fakeTranscribeAudio(result: FakeTranscription | (() => FakeTranscription)) {
+  return async (route: Route) => {
+    if (route.request().method() === 'OPTIONS') {
+      return route.fulfill({
+        status: 200,
+        headers: { ...CORS_HEADERS, 'Access-Control-Allow-Headers': '*' },
+      })
+    }
+    const { sourceId } = route.request().postDataJSON() as { sourceId: string }
+    const outcome = typeof result === 'function' ? result() : result
+    if (outcome.outcome === 'ignore') {
+      return route.fulfill({
+        status: 202,
+        json: { sourceId, status: 'processing' },
+        headers: CORS_HEADERS,
+      })
+    }
+    if (outcome.outcome === 'limit') {
+      return route.fulfill({
+        status: 429,
+        headers: CORS_HEADERS,
+        json: {
+          error: {
+            code: 'limit_reached',
+            message:
+              'Bu ayki ses dakikan doldu. Kaydın saklanıyor; hakkın yenilenince yazıya dökebilirsin.',
+          },
+        },
+      })
+    }
+
+    const db = serviceClient()
+    await db.from('sources').update({ status: 'processing' }).eq('id', sourceId)
+    await route.fulfill({
+      status: 202,
+      json: { sourceId, status: 'processing' },
+      headers: CORS_HEADERS,
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    if (outcome.outcome === 'failed') {
+      await db.from('sources').update({ status: 'failed' }).eq('id', sourceId)
+      return
+    }
+    const { data: note } = await db.from('sources').select('user_id').eq('id', sourceId).single()
+    await db.from('transcripts').upsert(
+      {
+        user_id: note!.user_id,
+        source_id: sourceId,
+        text: outcome.text,
+        language: 'tr',
+        duration_sec: outcome.durationSec ?? 42,
+        segments: [],
+      },
+      { onConflict: 'source_id' },
+    )
+    await db.rpc('record_stt_usage', {
+      p_user_id: note!.user_id,
+      p_minutes: (outcome.durationSec ?? 42) / 60,
+      p_cost_usd: 0,
+    })
+    await db.from('sources').update({ status: 'ready' }).eq('id', sourceId)
   }
 }

@@ -7,7 +7,7 @@ useSeoMeta({ title: 'Sonuç' })
 const route = useRoute()
 const router = useRouter()
 const id = computed(() => String(route.params.id))
-const { getNote, getSummary, listNoteTasks, processNote } = useNoteResult()
+const { getNote, getSummary, listNoteTasks, getTranscript, processNote } = useNoteResult()
 const ready = useIsMounted()
 
 // Personal data: loaded in the browser only.
@@ -15,9 +15,13 @@ const { data, status, error, refresh } = useAsyncData(
   () => `note-${id.value}`,
   async () => {
     const note = await getNote(id.value)
-    if (!note) return { note: null, summary: null, boardTasks: [] }
-    const [summary, boardTasks] = await Promise.all([getSummary(note.id), listNoteTasks(note.id)])
-    return { note, summary, boardTasks }
+    if (!note) return { note: null, summary: null, boardTasks: [], transcript: null }
+    const [summary, boardTasks, transcript] = await Promise.all([
+      getSummary(note.id),
+      listNoteTasks(note.id),
+      note.type === 'audio' ? getTranscript(note.id) : null,
+    ])
+    return { note, summary, boardTasks, transcript }
   },
   { server: false },
 )
@@ -110,7 +114,14 @@ const showFailure = computed(
         </p>
       </header>
 
-      <details class="rounded-xl bg-white ring-1 ring-navy-100">
+      <AudioNoteStatus
+        v-if="note.type === 'audio'"
+        :note="note"
+        :transcript="data?.transcript ?? null"
+        @refresh="refresh()"
+      />
+
+      <details v-else-if="note.raw_text" class="rounded-xl bg-white ring-1 ring-navy-100">
         <summary class="cursor-pointer px-4 py-3 text-sm font-medium text-navy-900">
           Notun metni
         </summary>
@@ -119,8 +130,10 @@ const showFailure = computed(
         </p>
       </details>
 
+      <template v-if="note.type === 'audio'" />
+
       <div
-        v-if="processing && !summary"
+        v-else-if="processing && !summary"
         role="status"
         class="flex flex-col items-center gap-3 rounded-xl bg-white px-4 py-10 text-center ring-1 ring-navy-100"
       >

@@ -35,7 +35,9 @@ select lives_ok(
   'a text note without a title is accepted'
 );
 select lives_ok(
-  $$ insert into public.sources (type, raw_text) values ('audio', null) $$,
+  $$ insert into public.sources (id, type, raw_text, consent_confirmed_at, storage_path)
+     values ('34343434-3434-4343-8343-343434343434', 'audio', null, now(),
+             '33333333-3333-4333-8333-333333333333/34343434-3434-4343-8343-343434343434.m4a') $$,
   'audio sources are not limited by the text note check'
 );
 

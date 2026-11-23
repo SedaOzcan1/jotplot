@@ -60,6 +60,7 @@ describe('noteDisplayTitle', () => {
 
   it('uses a placeholder when there is no title or text', () => {
     expect(noteDisplayTitle({ title: null, raw_text: null })).toBe('Başlıksız not')
+    expect(noteDisplayTitle({ title: null, raw_text: null, type: 'audio' })).toBe('Ses kaydı')
   })
 })
 

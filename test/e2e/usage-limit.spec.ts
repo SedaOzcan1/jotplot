@@ -17,7 +17,16 @@ async function signInAsNewUser(page: Page) {
 function fakeUsage(page: Page, used: number) {
   return page.route('**/rest/v1/rpc/get_my_ai_usage**', (route) =>
     route.fulfill({
-      json: [{ used, request_limit: 50, plan: 'free', period: '2026-11-01' }],
+      json: [
+        {
+          used,
+          request_limit: 50,
+          plan: 'free',
+          period: '2026-11-01',
+          stt_minutes: 0,
+          stt_minute_limit: 30,
+        },
+      ],
     }),
   )
 }

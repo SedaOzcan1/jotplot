@@ -1,5 +1,7 @@
 <script setup lang="ts">
-/** "Bu ayki kullanım" on the settings page (wireframe 8, US-1.6). */
+import type { AiUsageLevel } from '~/utils/aiUsage'
+
+/** "Bu ayki kullanım" on the settings page (wireframe 8, US-1.6): AI requests and recording minutes. */
 const { getAiUsage } = useAiUsage()
 
 // Personal data: loaded in the browser only.
@@ -17,6 +19,16 @@ const percent = computed(() =>
   usage.value ? Math.min(100, Math.round((usage.value.used / usage.value.limit) * 100)) : 0,
 )
 const message = computed(() => (usage.value ? aiUsageMessage(usage.value) : null))
+
+const sttLevel = computed(() => (usage.value ? sttUsageLevel(usage.value) : 'ok'))
+const sttPercent = computed(() =>
+  usage.value
+    ? Math.min(100, Math.round((usage.value.sttMinutes / usage.value.sttLimit) * 100))
+    : 0,
+)
+const sttMessage = computed(() => (usage.value ? sttUsageMessage(usage.value) : null))
+const barColor = (value: AiUsageLevel) =>
+  value === 'reached' ? 'bg-red-500' : value === 'near' ? 'bg-amber-500' : 'bg-brand-gradient'
 </script>
 
 <template>
@@ -44,13 +56,7 @@ const message = computed(() => (usage.value ? aiUsageMessage(usage.value) : null
       >
         <div
           class="h-full rounded-full"
-          :class="
-            level === 'reached'
-              ? 'bg-red-500'
-              : level === 'near'
-                ? 'bg-amber-500'
-                : 'bg-brand-gradient'
-          "
+          :class="barColor(level)"
           :style="{ width: `${percent}%` }"
         />
       </div>
@@ -68,6 +74,39 @@ const message = computed(() => (usage.value ? aiUsageMessage(usage.value) : null
       <p class="text-xs text-slate-500">
         Bir notu “Görevleri çıkar” ile işlemek bir hak kullanır. Notları kaydetmek ücretsizdir.
       </p>
+
+      <div class="space-y-3 border-t border-slate-100 pt-3">
+        <div
+          role="progressbar"
+          aria-label="Ses dakikası kullanımı"
+          :aria-valuenow="usage.sttMinutes"
+          aria-valuemin="0"
+          :aria-valuemax="usage.sttLimit"
+          class="h-2 overflow-hidden rounded-full bg-navy-100"
+        >
+          <div
+            class="h-full rounded-full"
+            :class="barColor(sttLevel)"
+            :style="{ width: `${sttPercent}%` }"
+          />
+        </div>
+        <p class="text-sm text-slate-700">
+          <span class="font-semibold text-navy-900">
+            {{ formatMinutes(usage.sttMinutes) }} / {{ usage.sttLimit }} dk
+          </span>
+          ses kaydı · {{ formatResetDateLocative(usage.period) }} yenilenir
+        </p>
+        <p
+          v-if="sttMessage"
+          class="text-sm"
+          :class="sttLevel === 'reached' ? 'text-red-700' : 'text-amber-700'"
+        >
+          {{ sttMessage }}
+        </p>
+        <p class="text-xs text-slate-500">
+          Kayıtlar yazıya dökülünce uzunlukları kadar dakika kullanır.
+        </p>
+      </div>
     </template>
   </section>
 </template>

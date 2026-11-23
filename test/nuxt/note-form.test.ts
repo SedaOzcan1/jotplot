@@ -41,6 +41,8 @@ describe('NoteForm', () => {
       limit: 50,
       plan: 'free',
       period: '2026-11-01',
+      sttMinutes: 0,
+      sttLimit: 30,
     })
     clearNuxtData('ai-usage')
   })
@@ -105,6 +107,8 @@ describe('NoteForm', () => {
       limit: 50,
       plan: 'free',
       period: '2026-11-01',
+      sttMinutes: 0,
+      sttLimit: 30,
     })
     const wrapper = await mountSuspended(NoteForm)
     await flushPromises()
@@ -123,6 +127,8 @@ describe('NoteForm', () => {
       limit: 50,
       plan: 'free',
       period: '2026-11-01',
+      sttMinutes: 0,
+      sttLimit: 30,
     })
     const wrapper = await mountSuspended(NoteForm)
     await flushPromises()
