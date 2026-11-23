@@ -220,7 +220,7 @@ Her görev Bölüm 8'deki **"tamamlandı" tanımına** uymalı.
 - [x] **T2.5 Transkript ekranı** (T2.3) — Transkripti okuma, ses oynatıcı.
 
 ### Faz 3 — RAG
-- [ ] **T3.1 PDF yükleme ve metin çıkarma** (T0.4) — Storage'a yükleme, PDF'ten metin çıkarma.
+- [x] **T3.1 PDF yükleme ve metin çıkarma** (T0.4) — Storage'a yükleme, PDF'ten metin çıkarma.
 - [ ] **T3.2 Chunking + embedding** (T3.1) — Metni parçalara böl, embedding üret, `chunks` tablosuna yaz. Notlar ve transkriptler için de çalışsın.
 - [ ] **T3.3 Benzerlik araması** (T3.2) — pgvector ile Postgres fonksiyonu (RPC), kullanıcıya göre filtre.
 - [ ] **T3.4 Soru-cevap Edge Function'ı** (T3.3) — Soru → arama → **akışlı** LLM cevabı + kaynak chunk id'leri.

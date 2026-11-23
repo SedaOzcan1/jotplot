@@ -55,15 +55,17 @@ async function storedFiles(user: TestUser) {
 test('an audio file is uploaded only after consent and becomes a note', async ({ page }) => {
   const user = await openTab(page, 'Dosya yükle')
   const fileInput = page.locator('input[type="file"]')
-
-  await expect(fileInput).toBeDisabled()
-  await consentBox(page).check()
   await expect(fileInput).toBeEnabled()
 
-  await page.getByLabel('Kaydın başlığı (isteğe bağlı)').last().fill('Müşteri görüşmesi')
+  await page.getByLabel('Dosyanın başlığı (isteğe bağlı)').fill('Müşteri görüşmesi')
   await fileInput.setInputFiles({ name: 'gorusme.wav', mimeType: 'audio/wav', buffer: silentWav() })
   await expect(page.getByText('gorusme.wav')).toBeVisible()
-  await page.getByRole('button', { name: 'Kaydı yükle' }).click()
+
+  // A recording asks for consent before it can be uploaded.
+  const upload = page.getByRole('button', { name: 'Kaydı yükle' })
+  await expect(upload).toBeDisabled()
+  await consentBox(page).check()
+  await upload.click()
 
   await expect(page).toHaveURL(/\/notes\/[0-9a-f-]+$/)
   await expect(page.getByText('Kayıt yüklendi').first()).toBeVisible()
@@ -80,8 +82,8 @@ test('an audio file is uploaded only after consent and becomes a note', async ({
 
 test('files that are not audio or too large are refused before uploading', async ({ page }) => {
   const user = await openTab(page, 'Dosya yükle')
-  await consentBox(page).check()
   const fileInput = page.locator('input[type="file"]')
+  await expect(fileInput).toBeEnabled()
 
   await fileInput.setInputFiles({
     name: 'notlar.txt',
@@ -107,10 +109,10 @@ test('a failed upload keeps the file and can be tried again', async ({ page }) =
     attempts++ === 0 ? route.abort('connectionreset') : route.continue(),
   )
 
+  const fileInput = page.locator('input[type="file"]')
+  await expect(fileInput).toBeEnabled()
+  await fileInput.setInputFiles({ name: 'ders.wav', mimeType: 'audio/wav', buffer: silentWav() })
   await consentBox(page).check()
-  await page
-    .locator('input[type="file"]')
-    .setInputFiles({ name: 'ders.wav', mimeType: 'audio/wav', buffer: silentWav() })
   await page.getByRole('button', { name: 'Kaydı yükle' }).click()
 
   await expect(page.getByRole('alert')).toContainText('Kayıt yüklenemedi')

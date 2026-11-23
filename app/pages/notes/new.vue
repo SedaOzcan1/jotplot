@@ -29,7 +29,7 @@ const tab = computed<Tab>({
     :ui="{ list: 'mb-4' }"
   >
     <template #write><NoteForm /></template>
-    <template #record><AudioNoteForm source="record" /></template>
-    <template #upload><AudioNoteForm source="upload" /></template>
+    <template #record><MediaNoteForm source="record" /></template>
+    <template #upload><MediaNoteForm source="upload" /></template>
   </UTabs>
 </template>

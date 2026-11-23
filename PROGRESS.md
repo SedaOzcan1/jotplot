@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Faz 2 — audio (complete). Next: Faz 3 (questions over notes and PDFs).
+Faz 3 — questions over notes and PDFs (in progress).
 
 ## Status
 
@@ -36,10 +36,13 @@ Faz 2 — audio (complete). Next: Faz 3 (questions over notes and PDFs).
 - [x] T2.4 Tasks extracted from transcripts automatically.
 - [x] T2.5 Transcript with an audio player on the note page.
 - [x] Complete T2.1–T2.5 as tracked in `PROJECT.md`.
+- [x] T3.1 PDF upload and text extraction.
 
 ## Latest Update
 
 2026-11-24: The embedding provider for T3.2 is chosen: Voyage `voyage-4` (1024 dimensions). `npm run eval:embeddings` compared five models on a synthetic Turkish archive; Voyage 4 ranked every answer first (results in `docs/EMBEDDING_COMPARISON.md`). Before real user data is sent, Voyage's data retention must be turned off in its dashboard. Next: T3.2, chunking and embeddings.
+
+2026-11-24: T3.1 is done. The "Dosya yükle" tab takes PDFs up to 10 MB as well as recordings; PDFs need no consent step and are named after their file when no title is written. The `extract-pdf` Edge Function reads the text with `unpdf` (up to 100 pages) as soon as the note page opens and saves it as the note's text, so PDFs show up in search. Scanned, damaged, or too long PDFs get a clear reason. The note page has "PDF’i aç" and the PDF's text; "Görevleri çıkar" works on it when the user asks. Next: T3.2, chunking and embeddings (the embedding provider is still an open decision).
 
 2026-11-23: T2.5 is done, and with it Faz 2. Audio notes show a player at the top of the note page (a signed link valid for an hour, renewed once if it expires) and a collapsible transcript with one paragraph per speaker turn. Speaker names appear when more than one speaker was found, a turn's time jumps the player to that moment, and the turn being played is highlighted. The full audio flow now works: record or upload with consent, automatic transcription with Deepgram, automatic task extraction, review, and the board. Next: Faz 3 starts with T3.1, PDF upload and text extraction.
 

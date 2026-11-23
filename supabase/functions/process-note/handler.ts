@@ -9,7 +9,7 @@ export type { NoteStatus } from '../_shared/run-analysis.ts'
  * Reads the note with the user's own permissions (Row Level Security), runs the analysis, saves
  * the summary with the extracted tasks as proposals (they reach the board only after the user
  * approves them), and returns the result. A text note is analyzed by its text, a recording by its
- * transcript (T2.4).
+ * transcript (T2.4), and a PDF by the text extracted from it (T3.1).
  */
 
 export const CORS_HEADERS = {
@@ -96,9 +96,11 @@ export interface ProcessNoteDeps extends Omit<AnalysisSteps, 'setStatus' | 'save
   userScope(authorization: string | null): Promise<UserScope | null>
 }
 
-/** The text the AI reads: a text note's text or a recording's transcript. */
+/** The text the AI reads: a text note's or PDF's text, or a recording's transcript. */
 export function analysisText(note: Note): string | null {
-  if (note.type === 'text') return note.raw_text?.trim() ? note.raw_text : null
+  if (note.type === 'text' || note.type === 'pdf') {
+    return note.raw_text?.trim() ? note.raw_text : null
+  }
   if (note.type === 'audio') return note.transcript?.trim() ? note.transcript : null
   return null
 }
