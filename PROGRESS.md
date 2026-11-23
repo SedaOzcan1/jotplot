@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Faz 1 — from note to tasks (complete). Next: Faz 2 (audio).
+Faz 2 — audio (in progress).
 
 ## Status
 
@@ -30,7 +30,10 @@ Faz 1 — from note to tasks (complete). Next: Faz 2 (audio).
 - [x] T1.8 Note search and type filters (PR #18).
 - [x] T1.3 AI quality check and manual test guide (PR #20).
 - [x] Complete T1.1–T1.9 as tracked in `PROJECT.md`.
+- [x] T2.1 Speech-to-text provider comparison; Deepgram Nova-3 chosen.
 
 ## Latest Update
+
+2026-11-23: T2.1 is done. `npm run eval:stt` compares speech-to-text providers on recordings of synthetic Turkish scripts. Seda chose Deepgram Nova-3: speaker labels and word timestamps, the fastest and cheapest option. Results are in `docs/STT_COMPARISON.md`; the work-note and lecture recordings will be added later to recheck. Next: T2.2, audio upload and recording.
 
 2026-11-18: Faz 1 is complete. T1.1–T1.9 are merged into `main` (PRs #12–#20). The full flow works: write a note, extract a summary, decisions, and tasks with Claude Haiku 5.5, review and edit them, add them to the board, and track them there. Free users can process 50 notes a month. `npm run eval:ai` checks the AI on ten synthetic notes (10/10 passing, about $0.013 per run), and `docs/MANUAL_TESTS.md` is the guide for testing by hand. Next: Faz 2 starts with T2.1, comparing speech-to-text providers on Turkish recordings; the provider is still an open decision.
