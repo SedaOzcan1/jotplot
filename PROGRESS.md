@@ -33,8 +33,11 @@ Faz 2 — audio (in progress).
 - [x] T2.1 Speech-to-text provider comparison; Deepgram Nova-3 chosen (PR #23).
 - [x] T2.2 Audio recording and upload.
 - [x] T2.3 Transcription Edge Function with Deepgram.
+- [x] T2.4 Tasks extracted from transcripts automatically.
 
 ## Latest Update
+
+2026-11-23: T2.4 is done. Right after a recording is transcribed, the same background job extracts the summary, decisions, and tasks from the transcript with the note analysis from T1.2 (now shared in `_shared/run-analysis.ts`). It counts one AI request; at the AI limit the transcript is still ready and tasks can be extracted later with "Görevleri çıkar". If extraction fails, only extraction is retried; the recording is never transcribed or billed twice. The note page shows the transcript in a collapsible section above the usual review screen and checks the status while the server works. A local run with a synthetic 41-second recording went from upload to proposed tasks in about 12 seconds. Next: T2.5, the transcript screen with an audio player.
 
 2026-11-23: T2.3 is done. The `transcribe-audio` Edge Function sends a saved recording to Deepgram Nova-3 in one piece and works in the background; the note page starts it on its own and shows "Yazıya dökülüyor…", the transcript, a failure with "Tekrar dene", or the monthly limit. Transcripts are saved with speakers and times, and minutes go to `usage`. Limits are 30 minutes a month on the free plan and 300 on premium, shown on the settings page. A local run with a synthetic 41-second recording was transcribed in about 2 seconds. Next: T2.4, extracting tasks from the transcript automatically.
 

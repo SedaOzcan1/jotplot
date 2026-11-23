@@ -210,12 +210,29 @@ describe('process-note', () => {
     expect(response.status).toBe(200)
   })
 
-  it('does not process notes that are not text yet', async () => {
-    note = { id: SOURCE_ID, type: 'audio', mode: 'work', raw_text: null }
+  it('analyzes a recording by its transcript', async () => {
+    note = {
+      id: SOURCE_ID,
+      type: 'audio',
+      mode: 'work',
+      raw_text: null,
+      transcript: 'Ece görselleri cuma gününe kadar hazırlayacak.',
+    }
 
     const response = await post({ sourceId: SOURCE_ID })
 
-    expect(response.status).toBe(422)
-    expect(await errorCode(response)).toBe('unsupported_note')
+    expect(response.status).toBe(200)
+    expect(deps.analyze).toHaveBeenCalledWith(
+      expect.objectContaining({ text: 'Ece görselleri cuma gününe kadar hazırlayacak.' }),
+    )
+  })
+
+  it('does not process a recording before its transcript exists, or a PDF yet', async () => {
+    note = { id: SOURCE_ID, type: 'audio', mode: 'work', raw_text: null, transcript: null }
+    expect(await errorCode(await post({ sourceId: SOURCE_ID }))).toBe('unsupported_note')
+
+    note = { id: SOURCE_ID, type: 'pdf', mode: 'work', raw_text: null }
+    expect(await errorCode(await post({ sourceId: SOURCE_ID }))).toBe('unsupported_note')
+    expect(deps.reserveRequest).not.toHaveBeenCalled()
   })
 })

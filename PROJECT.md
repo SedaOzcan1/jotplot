@@ -216,7 +216,7 @@ Her görev Bölüm 8'deki **"tamamlandı" tanımına** uymalı.
 - [x] **T2.1 STT servisi seçimi** — Whisper ve Deepgram'ı Türkçe örnek kayıtlarla karşılaştır (kalite, konuşmacı ayrımı, zaman damgası, maliyet). Sonucu `DECISIONS.md`'ye yaz.
 - [x] **T2.2 Ses yükleme ve kayıt** (T0.4) — Dosya yükleme + MediaRecorder ile kayıt, kayıt sırasında Screen Wake Lock (telefonda ekran kapanıp kayıt kesilmesin), kayıttan önce onay uyarısı, Storage'a yükleme, ilerleme göstergesi.
 - [x] **T2.3 Transkripsiyon Edge Function'ı** (T2.1, T2.2) — Uzun kayıtları parçalara bölme, arka planda işleme, `transcripts` tablosu (segments dahil), durum takibi (işleniyor / hazır / hata), dakika kullanımını `usage`'a yazma.
-- [ ] **T2.4 F1'e bağlama** (T2.3, T1.2) — Transkript hazır olunca agent'ı otomatik çalıştır.
+- [x] **T2.4 F1'e bağlama** (T2.3, T1.2) — Transkript hazır olunca agent'ı otomatik çalıştır.
 - [ ] **T2.5 Transkript ekranı** (T2.3) — Transkripti okuma, ses oynatıcı.
 
 ### Faz 3 — RAG

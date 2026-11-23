@@ -1,20 +1,15 @@
-import Anthropic from '@anthropic-ai/sdk'
 import { z } from 'zod'
-import {
-  type AnalysisModel,
-  type AnalysisUsage,
-  type AnalyzeNoteInput,
-  type AnalyzeNoteResult,
-  type NoteAnalysis,
-  type NoteMode,
-  todayInIstanbul,
-} from '../_shared/note-analysis.ts'
+import type { NoteMode } from '../_shared/note-analysis.ts'
+import { type AnalysisSteps, type NoteStatus, runAnalysis } from '../_shared/run-analysis.ts'
+
+export type { NoteStatus } from '../_shared/run-analysis.ts'
 
 /**
  * POST /functions/v1/process-note with `{ "sourceId": "<uuid>" }` and the user's access token.
  * Reads the note with the user's own permissions (Row Level Security), runs the analysis, saves
  * the summary with the extracted tasks as proposals (they reach the board only after the user
- * approves them), and returns the result.
+ * approves them), and returns the result. A text note is analyzed by its text, a recording by its
+ * transcript (T2.4).
  */
 
 export const CORS_HEADERS = {
@@ -83,9 +78,9 @@ export interface Note {
   type: string
   mode: NoteMode
   raw_text: string | null
+  /** The transcript of a recording, once it exists. */
+  transcript?: string | null
 }
-
-export type NoteStatus = 'processing' | 'ready' | 'failed'
 
 /** Data access with the signed-in user's permissions. */
 export interface UserScope {
@@ -93,31 +88,19 @@ export interface UserScope {
   loadNote(sourceId: string): Promise<Note | null>
   setStatus(sourceId: string, status: NoteStatus): Promise<void>
   /** Creates or replaces the note's summary; returns the summary id. */
-  saveSummary(sourceId: string, analysis: NoteAnalysis): Promise<string>
+  saveSummary: AnalysisSteps['saveSummary']
 }
 
-export interface ProcessNoteDeps {
-  model: AnalysisModel
+export interface ProcessNoteDeps extends Omit<AnalysisSteps, 'setStatus' | 'saveSummary'> {
   /** Returns null when the access token is missing or invalid. */
   userScope(authorization: string | null): Promise<UserScope | null>
-  analyze(input: AnalyzeNoteInput): Promise<AnalyzeNoteResult>
-  /** Counts one AI request; false when the user's monthly limit is reached. Service role. */
-  reserveRequest(userId: string): Promise<boolean>
-  /** Gives back a counted request when the AI never ran. Service role. */
-  releaseRequest(userId: string): Promise<void>
-  /** Runs with the service role; users cannot write usage themselves. */
-  recordUsage(userId: string, usage: AnalysisUsage): Promise<void>
-  now?: () => Date
-  log?: (message: string, details?: Record<string, unknown>) => void
 }
 
-/** Network problems, rate limits, and overloaded or failing servers are worth retrying later. */
-function isTemporaryApiError(error: unknown): boolean {
-  if (error instanceof Anthropic.APIConnectionError) return true
-  if (error instanceof Anthropic.APIError) {
-    return error.status === 429 || (error.status !== undefined && error.status >= 500)
-  }
-  return false
+/** The text the AI reads: a text note's text or a recording's transcript. */
+export function analysisText(note: Note): string | null {
+  if (note.type === 'text') return note.raw_text?.trim() ? note.raw_text : null
+  if (note.type === 'audio') return note.transcript?.trim() ? note.transcript : null
+  return null
 }
 
 export function createHandler(deps: ProcessNoteDeps) {
@@ -142,54 +125,14 @@ export function createHandler(deps: ProcessNoteDeps) {
       return errorResponse('internal')
     }
     if (!note) return errorResponse('note_not_found')
-    if (note.type !== 'text' || !note.raw_text) return errorResponse('unsupported_note')
+    const text = analysisText(note)
+    if (!text) return errorResponse('unsupported_note')
 
-    // The request is counted before the AI runs so parallel requests cannot pass the limit.
-    try {
-      if (!(await deps.reserveRequest(scope.userId))) return errorResponse('limit_reached')
-      await scope.setStatus(sourceId, 'processing')
-    } catch (error) {
-      log('Checking the usage limit failed', { sourceId, error: String(error) })
-      return errorResponse('internal')
-    }
-
-    let aiRan = false
-    try {
-      const result = await deps.analyze({
-        text: note.raw_text,
-        mode: note.mode,
-        model: deps.model,
-        today: todayInIstanbul(deps.now?.() ?? new Date()),
-      })
-      aiRan = true
-
-      try {
-        await deps.recordUsage(scope.userId, result.usage)
-      } catch (error) {
-        // The user still gets their result; the missing usage row is logged for follow-up.
-        log('Recording AI usage failed', { sourceId, error: String(error) })
-      }
-
-      if (!result.analysis) {
-        const code = result.error?.code ?? 'ai_invalid_output'
-        log('AI output was not usable', { sourceId, code })
-        await scope.setStatus(sourceId, 'failed')
-        return errorResponse(code)
-      }
-
-      const summaryId = await scope.saveSummary(sourceId, result.analysis)
-      await scope.setStatus(sourceId, 'ready')
-      return json({ sourceId, summaryId, analysis: result.analysis })
-    } catch (error) {
-      log('Processing a note failed', { sourceId, error: String(error) })
-      // Nothing was billed when the AI never answered, so the request does not count.
-      if (!aiRan) {
-        await deps.releaseRequest(scope.userId).catch((releaseError: unknown) => {
-          log('Giving back an AI request failed', { sourceId, error: String(releaseError) })
-        })
-      }
-      await scope.setStatus(sourceId, 'failed').catch(() => {})
-      return errorResponse(isTemporaryApiError(error) ? 'ai_unavailable' : 'internal')
-    }
+    const outcome = await runAnalysis(
+      { ...deps, setStatus: scope.setStatus, saveSummary: scope.saveSummary },
+      { userId: scope.userId, sourceId, text, mode: note.mode },
+    )
+    if (!outcome.ok) return errorResponse(outcome.code)
+    return json({ sourceId, summaryId: outcome.summaryId, analysis: outcome.analysis })
   }
 }

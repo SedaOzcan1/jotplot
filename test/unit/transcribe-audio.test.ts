@@ -130,6 +130,19 @@ describe('transcribeWithDeepgram', () => {
 
 describe('transcribe-audio', () => {
   const transcript: Transcript = parseDeepgramResponse(deepgramAnswer())
+  const analysis = {
+    summary: 'Rapor hazır.',
+    decisions: [],
+    concepts: [],
+    questions: [],
+    tasks: [{ title: 'Raporu paylaş', type: 'task' as const, assignee: 'Kaan', due_date: null }],
+  }
+  const aiUsage = {
+    model: 'claude-haiku-5-5' as const,
+    inputTokens: 10,
+    outputTokens: 5,
+    costUsd: 0.001,
+  }
   let note: AudioNote | null
   let background: Promise<void>[]
   let deps: TranscribeAudioDeps & {
@@ -138,16 +151,23 @@ describe('transcribe-audio', () => {
     downloadAudio: ReturnType<typeof vi.fn>
     transcribe: ReturnType<typeof vi.fn>
     saveTranscript: ReturnType<typeof vi.fn>
-    recordUsage: ReturnType<typeof vi.fn>
+    recordMinutes: ReturnType<typeof vi.fn>
     setStatus: ReturnType<typeof vi.fn>
+    analyze: ReturnType<typeof vi.fn>
+    reserveRequest: ReturnType<typeof vi.fn>
+    releaseRequest: ReturnType<typeof vi.fn>
+    recordUsage: ReturnType<typeof vi.fn>
+    saveSummary: ReturnType<typeof vi.fn>
   }
 
   beforeEach(() => {
     note = {
       id: SOURCE_ID,
       type: 'audio',
+      mode: 'work',
       status: 'pending',
       storage_path: `user-1/${SOURCE_ID}.webm`,
+      transcribed: false,
     }
     background = []
     const startTranscription = vi.fn().mockResolvedValue(true)
@@ -161,9 +181,16 @@ describe('transcribe-audio', () => {
       downloadAudio: vi.fn().mockResolvedValue(new Blob(['ses'], { type: 'audio/webm' })),
       transcribe: vi.fn().mockResolvedValue(transcript),
       saveTranscript: vi.fn().mockResolvedValue(undefined),
-      recordUsage: vi.fn().mockResolvedValue(undefined),
+      recordMinutes: vi.fn().mockResolvedValue(undefined),
       setStatus: vi.fn().mockResolvedValue(undefined),
       runInBackground: (work) => background.push(work),
+      model: 'claude-haiku-5-5',
+      analyze: vi.fn().mockResolvedValue({ analysis, usage: aiUsage }),
+      reserveRequest: vi.fn().mockResolvedValue(true),
+      releaseRequest: vi.fn().mockResolvedValue(undefined),
+      recordUsage: vi.fn().mockResolvedValue(undefined),
+      saveSummary: vi.fn().mockResolvedValue('summary-1'),
+      now: () => new Date('2026-11-23T09:00:00Z'),
     }
   })
 
@@ -204,14 +231,21 @@ describe('transcribe-audio', () => {
     expect(await response.json()).toEqual({ sourceId: SOURCE_ID, status: 'processing' })
     expect(deps.downloadAudio).toHaveBeenCalledWith(`user-1/${SOURCE_ID}.webm`)
     expect(deps.saveTranscript).toHaveBeenCalledWith('user-1', SOURCE_ID, transcript)
-    expect(deps.recordUsage).toHaveBeenCalledWith('user-1', 1.26, transcriptionCostUsd(75.5))
-    expect(deps.setStatus).toHaveBeenCalledWith(SOURCE_ID, 'ready')
+    expect(deps.recordMinutes).toHaveBeenCalledWith('user-1', 1.26, transcriptionCostUsd(75.5))
+    expect(deps.setStatus).toHaveBeenLastCalledWith(SOURCE_ID, 'ready')
   })
 
   it('refuses notes that are missing or not recordings', async () => {
     note = null
     expect(await errorCode(await post({ sourceId: SOURCE_ID }))).toBe('note_not_found')
-    note = { id: SOURCE_ID, type: 'text', status: 'pending', storage_path: null }
+    note = {
+      id: SOURCE_ID,
+      type: 'text',
+      mode: 'work',
+      status: 'pending',
+      storage_path: null,
+      transcribed: false,
+    }
     expect(await errorCode(await post({ sourceId: SOURCE_ID }))).toBe('unsupported_note')
     expect(deps.transcribe).not.toHaveBeenCalled()
   })
@@ -248,13 +282,54 @@ describe('transcribe-audio', () => {
 
     expect(deps.setStatus).toHaveBeenCalledWith(SOURCE_ID, 'failed')
     expect(deps.saveTranscript).not.toHaveBeenCalled()
-    expect(deps.recordUsage).not.toHaveBeenCalled()
+    expect(deps.recordMinutes).not.toHaveBeenCalled()
+    expect(deps.analyze).not.toHaveBeenCalled()
   })
 
-  it('still delivers the transcript when recording the usage fails', async () => {
-    deps.recordUsage.mockRejectedValue(new Error('database down'))
+  it('still delivers the transcript when recording the minutes fails', async () => {
+    deps.recordMinutes.mockRejectedValue(new Error('database down'))
     await post({ sourceId: SOURCE_ID })
 
-    expect(deps.setStatus).toHaveBeenCalledWith(SOURCE_ID, 'ready')
+    expect(deps.setStatus).toHaveBeenLastCalledWith(SOURCE_ID, 'ready')
+  })
+
+  it('extracts the summary and tasks from the transcript right away', async () => {
+    await post({ sourceId: SOURCE_ID })
+
+    expect(deps.reserveRequest).toHaveBeenCalledWith('user-1')
+    expect(deps.analyze).toHaveBeenCalledWith(
+      expect.objectContaining({ text: transcript.text, mode: 'work', today: '2026-11-23' }),
+    )
+    expect(deps.saveSummary).toHaveBeenCalledWith('user-1', SOURCE_ID, analysis)
+    expect(deps.recordUsage).toHaveBeenCalledWith('user-1', aiUsage)
+    expect(deps.setStatus).toHaveBeenLastCalledWith(SOURCE_ID, 'ready')
+  })
+
+  it('keeps the transcript ready when the monthly AI limit is reached', async () => {
+    deps.reserveRequest.mockResolvedValue(false)
+    await post({ sourceId: SOURCE_ID })
+
+    expect(deps.saveTranscript).toHaveBeenCalled()
+    expect(deps.analyze).not.toHaveBeenCalled()
+    expect(deps.setStatus).toHaveBeenLastCalledWith(SOURCE_ID, 'ready')
+  })
+
+  it('keeps the transcript and minutes when task extraction fails', async () => {
+    deps.analyze.mockRejectedValue(new Error('AI down'))
+    await post({ sourceId: SOURCE_ID })
+
+    expect(deps.saveTranscript).toHaveBeenCalled()
+    expect(deps.recordMinutes).toHaveBeenCalled()
+    expect(deps.releaseRequest).toHaveBeenCalledWith('user-1')
+    expect(deps.setStatus).toHaveBeenLastCalledWith(SOURCE_ID, 'failed')
+  })
+
+  it('never transcribes a recording twice once it has a transcript', async () => {
+    note = { ...note!, status: 'failed', transcribed: true }
+    const response = await post({ sourceId: SOURCE_ID })
+
+    expect(await response.json()).toEqual({ sourceId: SOURCE_ID, status: 'failed' })
+    expect(deps.startTranscription).not.toHaveBeenCalled()
+    expect(deps.transcribe).not.toHaveBeenCalled()
   })
 })
